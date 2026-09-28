@@ -1,4 +1,4 @@
-package com.serhij.mashi.ui.screens
+package com.serhij.mashi.ui.screens.nav
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton

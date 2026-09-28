@@ -87,7 +87,7 @@ fun Auth() {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
-                    text = "Your pocket helper",
+                    text = "Your pocket friend",
                     fontSize = 20.sp,
                     fontStyle = FontStyle.Italic,
                     fontWeight = FontWeight.Bold,

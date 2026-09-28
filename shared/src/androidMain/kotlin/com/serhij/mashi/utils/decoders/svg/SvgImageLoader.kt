@@ -39,20 +39,17 @@ class SvgImageLoader(
     override suspend fun fetchOriginalSvgData(url: String): ByteArray? =
         withContext(Dispatchers.IO) {
             try {
-                val cacheKey = url
-                val snapshot = diskCache.openSnapshot(cacheKey)
+                val snapshot = diskCache.openSnapshot(url)
 
-                if (snapshot != null) {
-                    snapshot.use {
-                        return@withContext it.data.toFile().readBytes()
-                    }
+                snapshot?.use {
+                    return@withContext it.data.toFile().readBytes()
                 }
 
                 // Fetch remote data using Java URL connection or Ktor Client
                 val fetchedData = URL(url).readBytes()
 
                 // Store in disk cache
-                diskCache.openEditor(cacheKey)?.let { editor ->
+                diskCache.openEditor(url)?.let { editor ->
                     editor.data.toFile().writeBytes(fetchedData)
                     editor.commit()
                 }
