@@ -63,6 +63,10 @@ kotlin {
 
             // KTOR
             implementation(libs.ktor.client.okhttp)
+
+            // Coil
+            implementation(libs.coil.gif)
+            implementation(libs.coil.svg)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -92,6 +96,13 @@ kotlin {
 
             // Icons
             implementation(libs.material.icons.extended)
+
+            // Paging
+            implementation(libs.androidx.paging.compose)
+
+            // Coil
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
         }
         iosMain.dependencies {
             // KTOR

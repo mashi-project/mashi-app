@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C5F02DA1306AD4FD001B1AFC /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = C5F02DA0306AD4FD001B1AFC /* SDWebImage */; };
+		C5F02DA3306AD4FD001B1AFC /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = C5F02DA2306AD4FD001B1AFC /* SDWebImageMapKit */; };
+		C5F02DA6306AD510001B1AFC /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = C5F02DA5306AD510001B1AFC /* SDWebImageSVGCoder */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		12B58EC78E24CFD1A7C64C0F /* Mashi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mashi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -41,6 +47,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C5F02DA6306AD510001B1AFC /* SDWebImageSVGCoder in Frameworks */,
+				C5F02DA3306AD4FD001B1AFC /* SDWebImageMapKit in Frameworks */,
+				C5F02DA1306AD4FD001B1AFC /* SDWebImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +94,9 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+				C5F02DA0306AD4FD001B1AFC /* SDWebImage */,
+				C5F02DA2306AD4FD001B1AFC /* SDWebImageMapKit */,
+				C5F02DA5306AD510001B1AFC /* SDWebImageSVGCoder */,
 			);
 			productName = iosApp;
 			productReference = 12B58EC78E24CFD1A7C64C0F /* Mashi.app */;
@@ -114,6 +126,10 @@
 			);
 			mainGroup = 3B95296CCF5BE3DB0CC5B566;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C5F02D9F306AD4FD001B1AFC /* XCRemoteSwiftPackageReference "SDWebImage" */,
+				C5F02DA4306AD510001B1AFC /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 74E2DFDCD73300F98A9E0506 /* Products */;
 			projectDirPath = "";
@@ -369,6 +385,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C5F02D9F306AD4FD001B1AFC /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.21.7;
+			};
+		};
+		C5F02DA4306AD510001B1AFC /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSVGCoder";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C5F02DA0306AD4FD001B1AFC /* SDWebImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5F02D9F306AD4FD001B1AFC /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImage;
+		};
+		C5F02DA2306AD4FD001B1AFC /* SDWebImageMapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5F02D9F306AD4FD001B1AFC /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImageMapKit;
+		};
+		C5F02DA5306AD510001B1AFC /* SDWebImageSVGCoder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5F02DA4306AD510001B1AFC /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */;
+			productName = SDWebImageSVGCoder;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0B2E3DE94BC24D203A423408 /* Project object */;
 }

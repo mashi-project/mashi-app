@@ -5,6 +5,7 @@ import Shared
 struct iOSApp: App {
     init() {
         KoinInitIosKt.doInitKoinIos()
+        SharedCode.shared.doInit(swiftSvgLoader: SvgImageLoader())
     }
 
     var body: some Scene {
