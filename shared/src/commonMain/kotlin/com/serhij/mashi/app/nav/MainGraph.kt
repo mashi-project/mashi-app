@@ -1,0 +1,22 @@
+package com.serhij.mashi.app.nav
+
+import androidx.navigation.NavGraph
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import com.serhij.mashi.ui.screens.history.History
+import com.serhij.mashi.ui.screens.mashup.Mashup
+import com.serhij.mashi.ui.screens.settings.Settings
+
+fun NavGraphBuilder.mainGraph() {
+    composable<MainRoutes.Mashup> {
+        Mashup()
+    }
+
+    composable<MainRoutes.History> {
+        History()
+    }
+
+    composable<MainRoutes.Settings> {
+        Settings()
+    }
+}

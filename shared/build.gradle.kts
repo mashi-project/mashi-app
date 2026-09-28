@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -6,6 +7,21 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     kotlin("plugin.serialization")
+    id("com.codingfeline.buildkonfig") version "0.23.0"
+}
+
+val keysProperties = Properties().apply {
+    val keysFile = rootProject.file("keys.properties") // or project.file("keys.properties")
+    if (keysFile.exists()) {
+        load(keysFile.inputStream())
+    }
+}
+
+// Helper getter with fallback to environment variables (useful for CI/CD)
+fun getSecret(key: String): String {
+    return keysProperties.getProperty(key)
+        ?: System.getenv(key)
+        ?: ""
 }
 
 kotlin {
@@ -70,6 +86,12 @@ kotlin {
 
             // KTOR
             implementation(libs.ktor.client.core)
+
+            // Nav
+            implementation(libs.navigation.compose)
+
+            // Icons
+            implementation(libs.material.icons.extended)
         }
         iosMain.dependencies {
             // KTOR
@@ -78,6 +100,19 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+    }
+}
+
+buildkonfig {
+    packageName = "com.serhij.mashi"
+    objectName = "Keys"
+
+    defaultConfigs {
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
+            "MASHIT_API_KEY",
+            getSecret("MASHIT_API_KEY")
+        )
     }
 }
 

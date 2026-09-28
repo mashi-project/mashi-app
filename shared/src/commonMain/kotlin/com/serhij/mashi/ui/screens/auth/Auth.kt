@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import com.serhij.mashi.app.supabase.Supabase.supabase
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Discord
@@ -39,17 +40,12 @@ import mashi.shared.generated.resources.collage9
 import mashi.shared.generated.resources.katze
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun Auth() {
     val scope = rememberCoroutineScope()
-
-    suspend fun loginWithDiscord() {
-        supabase.auth.signInWith(
-            provider = Discord,
-            redirectUrl = "mashi://discord-callback"
-        )
-    }
+    val viewModel = koinViewModel<AuthViewModel>()
 
     val collageImages = remember {
         listOf(
@@ -107,9 +103,7 @@ fun Auth() {
 
             DiscordAuthButton(
                 modifier = Modifier.fillMaxWidth(0.8F),
-                onClick = {
-                    scope.launch { loginWithDiscord() }
-                }
+                onClick = { viewModel.connectDiscord(scope) }
             )
         }
     }
