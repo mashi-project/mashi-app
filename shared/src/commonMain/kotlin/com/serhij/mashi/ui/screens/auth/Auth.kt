@@ -1,13 +1,31 @@
 package com.serhij.mashi.ui.screens.auth
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.serhij.mashi.ui.screens.auth.composables.CollageBackground
+import androidx.compose.ui.unit.sp
+import com.serhij.mashi.app.supabase.Supabase.supabase
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.Discord
+import kotlinx.coroutines.launch
 import mashi.shared.generated.resources.Res
 import mashi.shared.generated.resources.collage1
 import mashi.shared.generated.resources.collage2
@@ -18,10 +36,21 @@ import mashi.shared.generated.resources.collage6
 import mashi.shared.generated.resources.collage7
 import mashi.shared.generated.resources.collage8
 import mashi.shared.generated.resources.collage9
+import mashi.shared.generated.resources.katze
 import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun Auth() {
+    val scope = rememberCoroutineScope()
+
+    suspend fun loginWithDiscord() {
+        supabase.auth.signInWith(
+            provider = Discord,
+            redirectUrl = "mashi://discord-callback"
+        )
+    }
+
     val collageImages = remember {
         listOf(
             Res.drawable.collage1, Res.drawable.collage2, Res.drawable.collage3,
@@ -34,20 +63,56 @@ fun Auth() {
         imageResource(res)
     }
 
-    CollageBackground(
-        images = collageBitmaps,
-        targetCellWidthPx = 276,
-        rotationDegrees = 13f,
-        blurRadius = 7.dp,
-        modifier = Modifier
-            .fillMaxSize()
-            .drawWithContent(
-                onDraw = {
-                    drawContent()
-                    drawRect(color = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.7f))
+    Box(modifier = Modifier.fillMaxSize()) {
+        CollageBackground(
+            images = collageBitmaps,
+            targetCellWidthPx = 276,
+            rotationDegrees = 13f,
+            blurRadius = 7.dp,
+            modifier = Modifier
+                .fillMaxSize()
+                .drawWithContent(
+                    onDraw = {
+                        drawContent()
+                        drawRect(color = Color.Black.copy(alpha = 0.8f))
+                    }
+                )
+        )
+
+        Column(
+            modifier = Modifier.align(Alignment.Center)
+                .widthIn(max = 480.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(0.8F),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Text(
+                    text = "Your pocket helper",
+                    fontSize = 20.sp,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+
+                Image(
+                    modifier = Modifier.size(72.dp),
+                    painter = painterResource(Res.drawable.katze),
+                    contentDescription = null
+                )
+            }
+
+            DiscordAuthButton(
+                modifier = Modifier.fillMaxWidth(0.8F),
+                onClick = {
+                    scope.launch { loginWithDiscord() }
                 }
             )
-    )
+        }
+    }
 }
 
 @Preview
