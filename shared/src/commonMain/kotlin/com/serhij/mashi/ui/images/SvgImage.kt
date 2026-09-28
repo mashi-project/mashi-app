@@ -1,7 +1,7 @@
 package com.serhij.mashi.ui.images
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,20 +23,40 @@ fun SvgImage(
     selectedColors: SelectedColors?,
 ) {
     val context = LocalPlatformContext.current
-    var bitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    var currentBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    var placeholderBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
 
     LaunchedEffect(url, selectedColors) {
-        bitmap = null
+        if (currentBitmap != null) {
+            placeholderBitmap = currentBitmap
+            currentBitmap = null
+        }
+
         val rawBytes = fetchOriginalSvgData(url, context) ?: return@LaunchedEffect
         val pngBytes = loadImageAsync(rawBytes, selectedColors, context) ?: return@LaunchedEffect
-        bitmap = pngBytes.toImageBitmapOrNull()
+
+        pngBytes.toImageBitmapOrNull()?.let { newBitmap ->
+            currentBitmap = newBitmap
+            placeholderBitmap = null
+        }
     }
 
-    bitmap?.let { bm ->
-        Image(
-            bitmap = bm,
-            contentDescription = null,
-            modifier = modifier
-        )
+    Box(modifier = modifier) {
+        placeholderBitmap?.let { placeholderBm ->
+            Image(
+                bitmap = placeholderBm,
+                contentDescription = null,
+                modifier = Modifier.matchParentSize()
+            )
+        }
+
+        currentBitmap?.let { bm ->
+            Image(
+                bitmap = bm,
+                contentDescription = null,
+                modifier = Modifier.matchParentSize()
+            )
+        }
     }
 }
