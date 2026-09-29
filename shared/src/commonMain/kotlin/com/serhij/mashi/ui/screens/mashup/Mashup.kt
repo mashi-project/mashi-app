@@ -15,16 +15,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +27,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -52,187 +45,166 @@ import com.serhij.mashi.ui.screens.mashup.sorting.Sorting
 import com.serhij.mashi.ui.theme.MediumPadding
 import com.serhij.mashi.ui.theme.Padding
 import com.serhij.mashi.ui.theme.SmallPadding
-import com.serhij.mashi.ui.theme.Surface
 import com.serhij.mashi.ui.theme.XLHolderHeight
 import com.serhij.mashi.ui.theme.XLHolderWidth
 import com.serhij.mashi.utils.helpers.detectScreenType
 import com.serhij.mashi.utils.helpers.getTraitsByType
 import com.serhij.mashi.utils.helpers.sortNfts
 import com.serhij.mashi.utils.helpers.toHexColor
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Mashup(
-    searchQuery: State<String>,
-    openSettings: () -> Unit,
-    onSignIn: () -> Unit,
-    viewModel: MashupViewModel,
-) {
-    val searchQueryValue by remember(searchQuery.value) {
-        mutableStateOf(searchQuery.value)
-    }
+fun Mashup(searchQuery: String) {
+    val viewModel = koinViewModel<MashupViewModel>()
+
+    val searchQueryValue by remember(searchQuery) { mutableStateOf(searchQuery) }
 
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
 
-    BoxWithConstraints {
-        val screenType = maxWidth.detectScreenType()
+    val colorChangingState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val previewState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val traitsGridState = rememberLazyGridState()
+    val collectiblesVState = rememberLazyListState()
 
-        val colorChangingState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
+    var height by remember { mutableStateOf(0.dp) }
+    val mashupUiState by remember { viewModel.mashupUiState }
+    val mashupState by remember { viewModel.mashupState }
+
+    val selectedColorType by remember(mashupState.selectedColorType) {
+        mutableStateOf(
+            mashupState.selectedColorType
         )
+    }
 
-        val previewState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true,
-        )
-
-        val traitsGridState = rememberLazyGridState()
-        val collectiblesVState = rememberLazyListState()
-
-        var height by remember {
-            mutableStateOf(0.dp)
+    val currentColor = remember(
+        selectedColorType,
+        mashupState.colors,
+    ) {
+        when (selectedColorType) {
+            ColorType.BASE -> mashupState.colors.base
+            ColorType.EYES -> mashupState.colors.eyes
+            ColorType.HAIR -> mashupState.colors.hair
         }
+    }
 
-        val mashupUiState by remember {
-            viewModel.mashupUiState
+    val previousColor = remember(
+        mashupState.mashupDetails,
+        selectedColorType,
+    ) {
+        when (selectedColorType) {
+            ColorType.BASE ->
+                mashupState.mashupDetails.colors.base
+
+            ColorType.EYES ->
+                mashupState.mashupDetails.colors.eyes
+
+            ColorType.HAIR ->
+                mashupState.mashupDetails.colors.hair
         }
+    }
 
-        val mashupState by remember {
-            viewModel.mashupState
-        }
+    var nfts by remember {
+        mutableStateOf<List<Mashi>>(emptyList())
+    }
 
-        val selectedColorType by remember(
-            mashupState.selectedColorType,
-        ) {
-            mutableStateOf(
-                mashupState.selectedColorType
-            )
-        }
-
-        val currentColor = remember(
-            selectedColorType,
-            mashupState.colors,
-        ) {
-            when (selectedColorType) {
-                ColorType.BASE -> mashupState.colors.base
-                ColorType.EYES -> mashupState.colors.eyes
-                ColorType.HAIR -> mashupState.colors.hair
-            }
-        }
-
-        val previousColor = remember(
-            mashupState.mashupDetails,
-            selectedColorType,
-        ) {
-            when (selectedColorType) {
-                ColorType.BASE ->
-                    mashupState.mashupDetails.colors.base
-
-                ColorType.EYES ->
-                    mashupState.mashupDetails.colors.eyes
-
-                ColorType.HAIR ->
-                    mashupState.mashupDetails.colors.hair
-            }
-        }
-
-        var nfts by remember {
-            mutableStateOf<List<Mashi>>(emptyList())
-        }
-
-        LaunchedEffect(mashupState.mashupDetails) {
-            val selectedBackground =
-                mashupState.mashupDetails.assets
-                    .first {
-                        it.type == TraitType.BACKGROUND
-                    }
-                    .url
-
-            val selectedNft =
-                nfts.firstOrNull { nft ->
-                    nft.traits?.any {
-                        it.url == selectedBackground
-                    } == true
+    LaunchedEffect(mashupState.mashupDetails) {
+        val selectedBackground =
+            mashupState.mashupDetails.assets
+                .first {
+                    it.type == TraitType.BACKGROUND
                 }
+                .url
+
+        val selectedNft =
+            nfts.firstOrNull { nft ->
+                nft.traits?.any {
+                    it.url == selectedBackground
+                } == true
+            }
+    }
+
+    LaunchedEffect(
+        mashupState.nfts,
+        searchQueryValue,
+    ) {
+        val temp = mashupState.nfts.toList()
+
+        nfts = if (searchQueryValue.isEmpty()) {
+            temp
+        } else {
+            temp.filter {
+                it.name.lowercase().contains(
+                    searchQueryValue.lowercase()
+                ) ||
+                        it.author.lowercase().contains(
+                            searchQueryValue.lowercase()
+                        )
+            }
         }
+    }
 
-        LaunchedEffect(
-            mashupState.nfts,
-            searchQueryValue,
-        ) {
-            val temp = mashupState.nfts.toList()
-
-            nfts = if (searchQueryValue.isEmpty()) {
-                temp
-            } else {
-                temp.filter {
-                    it.name.lowercase().contains(
-                        searchQueryValue.lowercase()
-                    ) ||
-                            it.author.lowercase().contains(
-                                searchQueryValue.lowercase()
-                            )
+    val selectedTraitUrl by remember(
+        mashupState.mashupDetails,
+        mashupState.selectedCategory,
+    ) {
+        derivedStateOf {
+            mashupState.mashupDetails.assets
+                .first {
+                    it.type == mashupState.selectedCategory
                 }
-            }
+                .url
+                ?: ""
         }
+    }
 
-        val selectedTraitUrl by remember(
-            mashupState.mashupDetails,
-            mashupState.selectedCategory,
-        ) {
-            derivedStateOf {
-                mashupState.mashupDetails.assets
-                    .first {
-                        it.type == mashupState.selectedCategory
-                    }
-                    .url
-                    ?: ""
-            }
-        }
-
-        val sortedNfts = remember(
+    val sortedNfts = remember(
+        mashupState.sortType,
+        nfts,
+    ) {
+        sortNfts(
             mashupState.sortType,
             nfts,
-        ) {
-            sortNfts(
-                mashupState.sortType,
-                nfts,
-            )
-        }
+        )
+    }
 
-        val traits by remember(
-            mashupState.selectedCategory,
-            sortedNfts,
-        ) {
-            derivedStateOf {
-                val traits =
-                    getTraitsByType(sortedNfts)[mashupState.selectedCategory]
-                        ?: emptyList()
+    val traits by remember(
+        mashupState.selectedCategory,
+        sortedNfts,
+    ) {
+        derivedStateOf {
+            val traits =
+                getTraitsByType(sortedNfts)[mashupState.selectedCategory]
+                    ?: emptyList()
 
-                if (
-                    mashupState.selectedCategory !=
-                    TraitType.BACKGROUND
-                ) {
-                    traits.distinctBy {
-                        it.avatarName
-                    }
-                } else {
-                    traits
+            if (
+                mashupState.selectedCategory !=
+                TraitType.BACKGROUND
+            ) {
+                traits.distinctBy {
+                    it.avatarName
                 }
+            } else {
+                traits
             }
         }
+    }
 
-        LaunchedEffect(
-            mashupUiState.isCollectibles,
-        ) {
-            if (mashupUiState.isCollectibles) {
-                collectiblesVState.animateScrollToItem(0)
-            }
+    LaunchedEffect(
+        mashupUiState.isCollectibles,
+    ) {
+        if (mashupUiState.isCollectibles) {
+            collectiblesVState.animateScrollToItem(0)
         }
+    }
 
-        val isSync by remember {
-            viewModel.isSync
-        }
+    val isSync by remember {
+        viewModel.isSync
+    }
+
+    BoxWithConstraints {
+        val screenType = maxWidth.detectScreenType()
 
         Column {
             if (mashupState.wallet != null) {
@@ -274,25 +246,6 @@ fun Mashup(
                                 viewModel.processActionsIntent(it)
                             }
                         )
-
-                        IconButton(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .size(40.dp),
-                            colors = IconButtonDefaults
-                                .iconButtonColors()
-                                .copy(
-                                    containerColor = Surface
-                                ),
-                            onClick = openSettings,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
                     }
 
                     Spacer(

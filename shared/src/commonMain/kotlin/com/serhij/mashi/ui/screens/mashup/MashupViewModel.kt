@@ -14,6 +14,7 @@ import com.serhij.mashi.data.models.mashup.MashupDetails
 import com.serhij.mashi.data.models.mashup.MashupTrait
 import com.serhij.mashi.data.models.traits.SortType
 import com.serhij.mashi.data.models.traits.TraitType
+import com.serhij.mashi.data.remote.MashiApi
 import com.serhij.mashi.data.repos.CollectionRepo
 import com.serhij.mashi.data.repos.DatastoreRepo
 import com.serhij.mashi.data.repos.ImageTypeRepo
@@ -37,7 +38,8 @@ class MashupViewModel(
     val collectionRepo: CollectionRepo,
     datastoreRepo: DatastoreRepo,
     private val mashitRepo: MashupRepo,
-    private val imageTypeRepo: ImageTypeRepo
+    private val imageTypeRepo: ImageTypeRepo,
+    private val mashiApi: MashiApi
 ) : ViewModel() {
 
     var mashupUiState = mutableStateOf(MashupUiState())
@@ -87,9 +89,9 @@ class MashupViewModel(
                         )
                         collectionRepo.cacheMashup(wallet = wallet, mashupDetails = syncedMashup)
 
-                        collectionRepo.updateOwnedData(wallet)
+                        collectionRepo.updateOwnedData("0xac73aca1205aff5dfc5e31223c33a970854057ae")
                     } catch (e: Exception) {
-
+                        print(e.message)
                     } finally {
                         isSync.value = false
                     }
@@ -107,6 +109,7 @@ class MashupViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             collectionFlow.distinctUntilChanged().collect { collection ->
                 withContext(Dispatchers.Main) {
+                    println(collection.size)
                     mashupUiState.value = mashupUiState.value.copy(isCollectionReady = true)
                     mashupState.value = mashupState.value.copy(nfts = collection.fromEntities())
                 }
@@ -254,14 +257,22 @@ class MashupViewModel(
     // Images
     fun getImageType(url: String, onResult: (ImageType?) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val result = imageTypeRepo.getImageType(url)?.type
-            withContext(Dispatchers.Main) { onResult(result) }
-        }
-    }
-
-    fun setImageType(url: String, imageType: ImageType) {
-        viewModelScope.launch(Dispatchers.IO) {
-            imageTypeRepo.insertImageType(ImageTypeEntity(url, imageType))
+            try {
+                var result = imageTypeRepo.getImageType(url)?.type
+                if (result == null) {
+                    val type = mashiApi.getImageType(url.split("/").last())
+                    imageTypeRepo.insertImageType(imageTypeEntity = ImageTypeEntity(url, type))
+                    result = type
+                }
+                withContext(Dispatchers.Main) {
+                    onResult(result)
+                }
+            } catch (e: Exception) {
+                println("⚠ Failed to fetch image type for $url: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    onResult(null) // Prevent crash and notify caller of failure
+                }
+            }
         }
     }
 
@@ -331,7 +342,6 @@ class MashupViewModel(
     fun processImageIntent(intent: ImageIntent) {
         when (intent) {
             is ImageIntent.OnTypeGet -> getImageType(intent.url, intent.onResult)
-            is ImageIntent.OnTypeSet -> setImageType(intent.url, intent.type)
         }
     }
 }

@@ -4,6 +4,8 @@ import com.serhij.mashi.data.remote.AlchemyApi
 import com.serhij.mashi.data.remote.AlchemyApiImpl
 import com.serhij.mashi.data.remote.IpfsApi
 import com.serhij.mashi.data.remote.IpfsApiImpl
+import com.serhij.mashi.data.remote.MashiApi
+import com.serhij.mashi.data.remote.MashiApiImpl
 import com.serhij.mashi.data.remote.MashupApi
 import com.serhij.mashi.data.remote.MashupApiImpl
 import io.ktor.client.HttpClient
@@ -20,6 +22,7 @@ val remoteModule = module {
                     ignoreUnknownKeys = true
                     prettyPrint = true
                     isLenient = true
+                    coerceInputValues = true
                 })
             }
         }
@@ -30,4 +33,6 @@ val remoteModule = module {
     factory<AlchemyApi> { AlchemyApiImpl(get()) }
 
     factory<IpfsApi> { IpfsApiImpl(get()) }
+
+    factory<MashiApi> { MashiApiImpl(get()) }
 }

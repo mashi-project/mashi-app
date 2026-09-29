@@ -2,10 +2,13 @@ package com.serhij.mashi.ui.screens
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,6 +19,9 @@ import androidx.navigation.compose.rememberNavController
 import com.serhij.mashi.app.nav.MainRoutes
 import com.serhij.mashi.app.nav.mainGraph
 import com.serhij.mashi.ui.nav.BottomNav
+import com.serhij.mashi.AppViewModel
+import com.serhij.mashi.ui.theme.Background
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun Main() {
@@ -40,6 +46,11 @@ fun Main() {
             }
         }
     ) { pv ->
+        Box(
+            modifier = Modifier.fillMaxSize()
+                .background(Background)
+        )
+
         NavHost(
             modifier = Modifier.padding(pv)
                 .fillMaxSize(),
@@ -48,7 +59,7 @@ fun Main() {
             exitTransition = { fadeOut() },
             enterTransition = { fadeIn() }
         ) {
-            mainGraph()
+            mainGraph(searchQ)
         }
     }
 }

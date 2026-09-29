@@ -16,5 +16,5 @@ class IpfsApiImpl(
 ) : IpfsApi {
 
     override suspend fun getMetadataByIpfsUri(uri: String): MetadataDto =
-        client.get("$baseUrl${uri.removePrefix("ipfs://")}").body()
+        client.get("${baseUrl}ipfs/${uri.removePrefix("ipfs://")}").body()
 }

@@ -9,6 +9,8 @@ import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.util.DebugLogger
+import com.serhij.mashi.utils.decoders.getAnimatedDecoderFactory
 
 @Composable
 fun NonSvgImage(
@@ -18,7 +20,9 @@ fun NonSvgImage(
 ) {
     val ctx = LocalPlatformContext.current
     val staticLoader = remember(ctx) {
-        ImageLoader.Builder(ctx).build()
+        ImageLoader.Builder(ctx).components {
+            add(getAnimatedDecoderFactory()!!)
+        }.logger(DebugLogger()).build()
     }
 
     val request = remember(data) {

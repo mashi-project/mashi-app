@@ -8,9 +8,4 @@ sealed class ImageIntent {
         val url: String,
         val onResult: (ImageType?) -> Unit
     ) : ImageIntent()
-
-    data class OnTypeSet(
-        val url: String,
-        val type: ImageType
-    ) : ImageIntent()
 }

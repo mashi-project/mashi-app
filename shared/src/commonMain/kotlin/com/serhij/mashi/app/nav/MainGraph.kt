@@ -1,15 +1,14 @@
 package com.serhij.mashi.app.nav
 
-import androidx.navigation.NavGraph
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.serhij.mashi.ui.screens.history.History
 import com.serhij.mashi.ui.screens.mashup.Mashup
 import com.serhij.mashi.ui.screens.settings.Settings
 
-fun NavGraphBuilder.mainGraph() {
+fun NavGraphBuilder.mainGraph(searchQ: String) {
     composable<MainRoutes.Mashup> {
-        Mashup()
+        Mashup(searchQuery = searchQ)
     }
 
     composable<MainRoutes.History> {

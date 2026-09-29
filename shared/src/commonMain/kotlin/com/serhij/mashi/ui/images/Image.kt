@@ -52,7 +52,7 @@ fun Image(
             ),
         contentAlignment = Alignment.Center
     ) {
-        val newData = "${RemoteConfig.KATZEMON_BASE_URL}api/mashis/${
+        val newData = "${RemoteConfig.KATZEMON_BASE_URL}api/mashi/app/image/${
             data.split("/").last()
         }"
 

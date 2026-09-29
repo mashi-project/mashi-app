@@ -36,16 +36,16 @@ class AlchemyRepo(
                 if (ownedNfts.isEmpty()) return emptyList()
 
                 ownedNfts.forEach { nft ->
-                    val metadata = nft.raw.metadata
+                    // Safely access raw and metadata using safe calls
+                    val metadata = nft.raw?.metadata
                     var details = NftDetails("", "", -1)
-                    val description = metadata.description
                     val tokenUri = nft.tokenUri.toFilebaseUri().toIpfsPartialUri()
 
-                    val assets = metadata.assets
+                    val assets = metadata?.assets ?: emptyList()
                     val (compositeUrl: String, traits: List<TraitDetails>) = try {
-                        val url = metadata.image.fromIpfsScheme()
+                        val url = metadata?.image?.fromIpfsScheme() ?: ""
                         val traits = assets.toTraits()
-                        details = parseName(metadata.name)
+                        details = parseName(metadata?.name ?: "")
 
                         url to traits
                     } catch (_: Exception) {
@@ -62,18 +62,22 @@ class AlchemyRepo(
 
                         url to traits
                     } finally {
-                        if (details.mint == -1) {
-                            val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
-                            details = parseName(ipfsMetadata.name)
+                        if (details.mint == -1 && tokenUri.isNotEmpty()) {
+                            try {
+                                val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
+                                details = parseName(ipfsMetadata.name)
+                            } catch (e: Exception) {
+                                println(e.message)
+                            }
                         }
                     }
 
                     val currentOwned = Owned(
                         mint = details.mint,
-                        timestamp = nft.timeLastUpdated
+                        timestamp = nft.timeLastUpdated ?: ""
                     )
 
-                    val tempNft = nfts.firstOrNull { nft -> nft.name == details.name }
+                    val tempNft = nfts.firstOrNull { existing -> existing.name == details.name }
 
                     tempNft?.let {
                         val owned = tempNft.owned?.toMutableList() ?: mutableListOf()

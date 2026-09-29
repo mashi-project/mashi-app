@@ -3,7 +3,9 @@ package com.serhij.mashi.data.models.mashup
 import com.serhij.mashi.data.models.colors.SelectedColors
 import com.serhij.mashi.data.models.traits.TraitDetails
 import com.serhij.mashi.data.models.traits.TraitType
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class MashupDetails(
     val assets: List<TraitDetails> = List(11) { i ->
         TraitDetails(

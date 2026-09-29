@@ -35,12 +35,18 @@ fun SvgImage(
             currentBitmap = null
         }
 
-        val rawBytes = fetchOriginalSvgData(data, context) ?: return@LaunchedEffect
-        val pngBytes = loadImageAsync(rawBytes, selectedColors, context) ?: return@LaunchedEffect
+        try {
+            val rawBytes = fetchOriginalSvgData(data, context) ?: return@LaunchedEffect
+            val pngBytes = loadImageAsync(rawBytes, selectedColors, context) ?: return@LaunchedEffect
 
-        pngBytes.toImageBitmapOrNull()?.let { newBitmap ->
-            currentBitmap = newBitmap
-            placeholderBitmap = null
+            pngBytes.toImageBitmapOrNull()?.let { newBitmap ->
+                currentBitmap = newBitmap
+                placeholderBitmap = null
+            }
+        } catch (e: Exception) {
+            // Gracefully catch SocketTimeoutException, IOException, etc.
+            // This stops the crash, leaving the placeholder or empty box intact.
+            println("⚠️️ Image load failed for $data: ${e.message}")
         }
     }
 

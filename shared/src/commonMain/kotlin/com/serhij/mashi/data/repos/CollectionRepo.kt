@@ -20,31 +20,57 @@ class CollectionRepo(
     suspend fun updateOwnedData(wallet: String): Boolean {
         try {
             val newCollection = alchemyRepo.getCollection(wallet)
+            println("Fetched new collection size: ${newCollection.size}")
+
+            // If the collection fetched from Alchemy is completely empty,
+            // decide whether you want to wipe local data or return early.
+            if (newCollection.isEmpty()) {
+                println("New collection from Alchemy is empty. Skipping update.")
+                return false // or true depending on your business logic
+            }
+
             val oldCollection = nftRepo.ownedNftsFlow.first()
 
             if (oldCollection.isEmpty()) {
-                if (newCollection.isNotEmpty()) {
-                    nftRepo.insertNfts(newCollection.toEntities())
-                }
+                nftRepo.insertNfts(newCollection.toEntities())
                 return true
             }
 
-            val newNames = newCollection.map { it.name }.toSet()
             val oldNames = oldCollection.map { it.name }.toSet()
+            val newNames = newCollection.map { it.name }.toSet()
 
             val toAdd = newCollection.filter { it.name !in oldNames }
             val toRemove = oldCollection.filter { it.name !in newNames }
+
+            // Fix: Map the updated domain model to its Entity version before sending to repo
             val toUpdate = newCollection.mapNotNull { new ->
                 val old = oldCollection.find { it.name == new.name }
-                if (old != null && new.owned != old.owned) old.copy(owned = new.owned) else null
+                // Ensure you compare or update safely
+                if (old != null) {
+                    // Convert domain model 'new' directly to entity, or map it properly
+                    new
+                } else {
+                    null
+                }
+            }.filter { updated ->
+                // Check if it actually needs an update compared to old collection
+                val old = oldCollection.find { it.name == updated.name }
+                old != null && old.owned != updated.owned
             }
 
-            if (toUpdate.isNotEmpty()) nftRepo.insertNfts(toUpdate)
-            if (toAdd.isNotEmpty()) nftRepo.insertNfts(toAdd.toEntities())
-            if (toRemove.isNotEmpty()) nftRepo.deleteNfts(toRemove)
+            if (toUpdate.isNotEmpty()) {
+                nftRepo.insertNfts(toUpdate.toEntities()) // Make sure to convert to entities!
+            }
+            if (toAdd.isNotEmpty()) {
+                nftRepo.insertNfts(toAdd.toEntities())
+            }
+            if (toRemove.isNotEmpty()) {
+                nftRepo.deleteNfts(toRemove)
+            }
 
             return true
         } catch (e: Exception) {
+            println(e.message)
             return false
         }
     }

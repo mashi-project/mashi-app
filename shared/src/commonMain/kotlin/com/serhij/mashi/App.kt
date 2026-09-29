@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,15 +21,16 @@ import com.serhij.mashi.ui.screens.auth.Auth
 import com.serhij.mashi.utils.decoders.getAnimatedDecoderFactory
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
-import kotlinx.coroutines.delay
 import kotlinx.serialization.json.jsonPrimitive
-import kotlin.time.Duration.Companion.milliseconds
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 @Preview
 fun App() {
+    val viewModel = koinViewModel<AppViewModel>()
+    val wallet by viewModel.walletFlow.collectAsState(null)
+
     var discordId by remember { mutableStateOf<String?>(null) }
-    var isReady by remember { mutableStateOf(false) }
 
     setSingletonImageLoaderFactory { context ->
         ImageLoader.Builder(context)
@@ -46,16 +48,12 @@ fun App() {
     }
 
     LaunchedEffect(Unit) {
-        delay(100.milliseconds)
-        isReady = true
-    }
-
-    LaunchedEffect(Unit) {
         supabase.auth.sessionStatus.collect { status ->
             when (status) {
                 is SessionStatus.Authenticated -> {
                     val user = status.session.user
                     discordId = user?.userMetadata?.get("sub")?.jsonPrimitive?.content
+                    viewModel.setWalletById(discordId!!)
                 }
 
                 is SessionStatus.NotAuthenticated -> {
@@ -68,13 +66,11 @@ fun App() {
     }
 
     MaterialTheme {
-        if (isReady) {
-            Column {
-                if (discordId != null) {
-                    Main()
-                } else {
-                    Auth()
-                }
+        Column {
+            if (wallet != null) {
+                Main()
+            } else {
+                Auth()
             }
         }
     }
