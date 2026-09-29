@@ -1,4 +1,4 @@
-package com.serhij.mashi.ui.screens.nav
+package com.serhij.mashi.ui.nav
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween

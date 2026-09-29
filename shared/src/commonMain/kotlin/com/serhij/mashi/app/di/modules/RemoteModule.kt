@@ -1,5 +1,9 @@
 package com.serhij.mashi.app.di.modules
 
+import com.serhij.mashi.data.remote.AlchemyApi
+import com.serhij.mashi.data.remote.AlchemyApiImpl
+import com.serhij.mashi.data.remote.IpfsApi
+import com.serhij.mashi.data.remote.IpfsApiImpl
 import com.serhij.mashi.data.remote.MashupApi
 import com.serhij.mashi.data.remote.MashupApiImpl
 import io.ktor.client.HttpClient
@@ -22,4 +26,8 @@ val remoteModule = module {
     }
 
     factory<MashupApi> { MashupApiImpl(get()) }
+
+    factory<AlchemyApi> { AlchemyApiImpl(get()) }
+
+    factory<IpfsApi> { IpfsApiImpl(get()) }
 }

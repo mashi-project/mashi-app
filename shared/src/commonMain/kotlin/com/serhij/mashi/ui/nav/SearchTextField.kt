@@ -1,4 +1,4 @@
-package com.serhij.mashi.ui.screens.nav
+package com.serhij.mashi.ui.nav
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row

@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import coil3.compose.LocalPlatformContext
 import com.serhij.mashi.data.models.colors.SelectedColors
 import com.serhij.mashi.utils.decoders.fetchOriginalSvgData
@@ -19,21 +20,22 @@ import com.serhij.mashi.utils.decoders.toImageBitmapOrNull
 @Composable
 fun SvgImage(
     modifier: Modifier = Modifier,
-    url: String,
+    data: String,
     selectedColors: SelectedColors?,
+    contentScale: ContentScale
 ) {
     val context = LocalPlatformContext.current
 
     var currentBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     var placeholderBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
 
-    LaunchedEffect(url, selectedColors) {
+    LaunchedEffect(data, selectedColors) {
         if (currentBitmap != null) {
             placeholderBitmap = currentBitmap
             currentBitmap = null
         }
 
-        val rawBytes = fetchOriginalSvgData(url, context) ?: return@LaunchedEffect
+        val rawBytes = fetchOriginalSvgData(data, context) ?: return@LaunchedEffect
         val pngBytes = loadImageAsync(rawBytes, selectedColors, context) ?: return@LaunchedEffect
 
         pngBytes.toImageBitmapOrNull()?.let { newBitmap ->
@@ -47,7 +49,8 @@ fun SvgImage(
             Image(
                 bitmap = placeholderBm,
                 contentDescription = null,
-                modifier = Modifier.matchParentSize()
+                modifier = Modifier.matchParentSize(),
+                contentScale = contentScale
             )
         }
 
@@ -55,7 +58,8 @@ fun SvgImage(
             Image(
                 bitmap = bm,
                 contentDescription = null,
-                modifier = Modifier.matchParentSize()
+                modifier = Modifier.matchParentSize(),
+                contentScale = contentScale
             )
         }
     }

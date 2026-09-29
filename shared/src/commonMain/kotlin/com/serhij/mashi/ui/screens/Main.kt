@@ -15,7 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.serhij.mashi.app.nav.MainRoutes
 import com.serhij.mashi.app.nav.mainGraph
-import com.serhij.mashi.ui.screens.nav.BottomNav
+import com.serhij.mashi.ui.nav.BottomNav
 
 @Composable
 fun Main() {

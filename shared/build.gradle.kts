@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room3)
     kotlin("plugin.serialization")
     id("com.codingfeline.buildkonfig") version "0.23.0"
 }
@@ -16,6 +18,7 @@ val keysProperties = Properties().apply {
         load(keysFile.inputStream())
     }
 }
+
 
 // Helper getter with fallback to environment variables (useful for CI/CD)
 fun getSecret(key: String): String {
@@ -67,6 +70,9 @@ kotlin {
             // Coil
             implementation(libs.coil.gif)
             implementation(libs.coil.svg)
+
+            // Room
+            implementation(libs.androidx.room3.sqlite.wrapper)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -103,6 +109,17 @@ kotlin {
             // Coil
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
+
+            // Room
+            implementation(libs.androidx.room3.runtime)
+            implementation(libs.androidx.sqlite.bundled)
+
+            // Datastore
+            implementation(libs.androidx.datastore.core)
+            implementation(libs.androidx.datastore.preferences.core)
+
+            // Paging
+            implementation(libs.androidx.paging.compose)
         }
         iosMain.dependencies {
             // KTOR
@@ -124,9 +141,21 @@ buildkonfig {
             "MASHIT_API_KEY",
             getSecret("MASHIT_API_KEY")
         )
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
+            "ALCHEMY_API_KEY",
+            getSecret("ALCHEMY_API_KEY")
+        )
     }
+}
+
+room3 {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
+    add("kspAndroid", libs.androidx.room3.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room3.compiler)
+    add("kspIosArm64", libs.androidx.room3.compiler)
 }
