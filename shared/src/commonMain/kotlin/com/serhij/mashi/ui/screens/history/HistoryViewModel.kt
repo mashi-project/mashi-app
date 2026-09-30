@@ -90,15 +90,4 @@ class HistoryViewModel(
             historyRepo.deleteHistoryImage(id)
         }
     }
-
-    fun getHistoryImageBytes(id: String, onResult: (ByteArray) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val bytes = historyRepo.getHistoryImageBytes(id)
-                onResult(bytes)
-            } catch (e: Exception) {
-                println(e.message)
-            }
-        }
-    }
 }

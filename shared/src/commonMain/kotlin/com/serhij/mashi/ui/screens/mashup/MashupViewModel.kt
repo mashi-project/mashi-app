@@ -41,6 +41,7 @@ class MashupViewModel(
     private val imageTypeRepo: ImageTypeRepo,
     private val mashiApi: MashiApi
 ) : ViewModel() {
+    val isLoading = mutableStateOf(false)
 
     var mashupUiState = mutableStateOf(MashupUiState())
         private set
@@ -204,6 +205,7 @@ class MashupViewModel(
             val uiState = mashupState.value
             if (uiState.wallet.isNullOrEmpty()) return@launch
 
+            isLoading.value = true
             val res = mashitRepo.saveMashup(uiState.mashupDetails, uiState.wallet)
             if (res?.success == true) {
                 val syncedMashup = collectionRepo.getMashup(uiState.wallet)
@@ -213,6 +215,7 @@ class MashupViewModel(
                 )
                 collectionRepo.cacheMashup(wallet = uiState.wallet, mashupDetails = syncedMashup)
             }
+            isLoading.value = false
         }
     }
 
