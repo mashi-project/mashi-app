@@ -1,10 +1,13 @@
 package com.serhij.mashi.ui.screens.history
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +15,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -27,6 +32,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun History() {
     val viewModel = koinViewModel<HistoryViewModel>()
     val wallet by remember { viewModel.wallet }
+    val isLoading by remember { viewModel.isLoading }
 
     val historyStream: LazyPagingItems<HistoryItemResponse>? =
         remember(wallet) {
@@ -133,6 +139,16 @@ fun History() {
                     }
                 }
             }
+        }
+    }
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3F)),
+            contentAlignment = Alignment.Center
+        ) {
+            LoadingIndicator()
         }
     }
 }

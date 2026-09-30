@@ -2,12 +2,14 @@ package com.serhij.mashi.ui.images
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -37,7 +39,8 @@ fun SvgImage(
 
         try {
             val rawBytes = fetchOriginalSvgData(data, context) ?: return@LaunchedEffect
-            val pngBytes = loadImageAsync(rawBytes, selectedColors, context) ?: return@LaunchedEffect
+            val pngBytes =
+                loadImageAsync(rawBytes, selectedColors, context) ?: return@LaunchedEffect
 
             pngBytes.toImageBitmapOrNull()?.let { newBitmap ->
                 currentBitmap = newBitmap
@@ -51,6 +54,15 @@ fun SvgImage(
     }
 
     Box(modifier = modifier) {
+        if (currentBitmap == null && placeholderBitmap == null) {
+            Box(
+                modifier = modifier.matchParentSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingIndicator()
+            }
+        }
+
         placeholderBitmap?.let { placeholderBm ->
             Image(
                 bitmap = placeholderBm,

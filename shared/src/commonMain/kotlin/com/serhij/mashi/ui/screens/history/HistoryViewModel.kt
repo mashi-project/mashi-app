@@ -27,6 +27,7 @@ class HistoryViewModel(
     private val imageSharer: ImageSharer
 ) : ViewModel() {
     val wallet = mutableStateOf<String?>(null)
+    val isLoading = mutableStateOf(false)
 
     val walletFlow = datastoreRepo.walletFlow
 
@@ -53,8 +54,10 @@ class HistoryViewModel(
     fun onSaveToGallery(imageType: ImageType, id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                isLoading.value = true
                 val bytes = historyRepo.getHistoryImageBytes(id)
                 val fileName = "mashi_${Clock.System.now().toEpochMilliseconds()}.${imageType.extension}"
+                isLoading.value = false
 
                 imageGallerySaver.saveImage(bytes, fileName)
             } catch (e: Exception) { }
@@ -64,8 +67,10 @@ class HistoryViewModel(
     fun onImageShare(imageType: ImageType, id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                isLoading.value = true
                 val bytes = historyRepo.getHistoryImageBytes(id)
                 val fileName = "mashi_${Clock.System.now().toEpochMilliseconds()}.${imageType.extension}"
+                isLoading.value = false
 
                 imageSharer.shareImage(bytes, fileName, "Share Image")
             } catch (e: Exception) { }
