@@ -6,7 +6,7 @@ object RemoteConfig {
     const val MASHIT_BASE_URL = "https://avatar-artists-guild.web.app/"
     const val KATZEMON_BASE_URL = "https://katzemon.com/"
     const val ALCHEMY_BASE_URL = "https://polygon-mainnet.g.alchemy.com/"
-    const val IPFS_BASE_URL = "https://ipfs.filebase.io/"
+    const val IPFS_BASE_URL = "https://round-peach-hippopotamus.myfilebase.com/"
 
     val MASHIT_API_KEY = Keys.MASHIT_API_KEY
     val ALCHEMY_API_KEY = Keys.ALCHEMY_API_KEY
