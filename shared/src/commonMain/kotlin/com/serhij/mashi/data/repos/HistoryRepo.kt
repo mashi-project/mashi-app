@@ -16,12 +16,6 @@ class HistoryRepo(private val mashiApi: MashiApi) {
 
     suspend fun deleteHistoryByWallet(wallet: String) = mashiApi.deleteHistoryByWallet(wallet)
 
-    suspend fun getHistory(
-        wallet: String,
-        page: Int? = null,
-        limit: Int = 10
-    ) = mashiApi.getHistory(wallet, page, limit)
-
     fun getHistoryStream(wallet: String, pageSize: Int = 10): Flow<PagingData<HistoryItemResponse>> {
         return Pager(
             config = PagingConfig(

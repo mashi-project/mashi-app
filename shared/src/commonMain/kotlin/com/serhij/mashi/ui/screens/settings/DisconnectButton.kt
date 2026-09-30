@@ -44,6 +44,7 @@ fun DisconnectButton(
             Spacer(modifier = Modifier.weight(1F))
 
             Text(
+                color = Color.White,
                 text = "Disconnect",
                 fontSize = 20.sp
             )

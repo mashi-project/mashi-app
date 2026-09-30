@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.serhij.mashi.data.models.traits.TraitDetails
 import com.serhij.mashi.data.states.image.ImageIntent
-import com.serhij.mashi.ui.images.Image
+import com.serhij.mashi.ui.images.DefaultImage
 import com.serhij.mashi.ui.theme.ContentAccentColor
 import com.serhij.mashi.ui.theme.ContentColor
 import com.serhij.mashi.ui.theme.Primary
@@ -45,7 +45,7 @@ fun TraitHolder(
                 )
                 .padding(4.dp),
         ) {
-            Image(
+            DefaultImage(
                 modifier = Modifier,
                 data = trait.url ?: "",
                 onClick = onClick,

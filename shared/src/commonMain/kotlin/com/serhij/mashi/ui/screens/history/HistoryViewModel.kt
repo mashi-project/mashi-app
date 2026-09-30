@@ -1,23 +1,23 @@
-package com.serhij.mashi.ui.screens.settings
+package com.serhij.mashi.ui.screens.history
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.serhij.mashi.app.supabase.Supabase.supabase
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.serhij.mashi.data.remote.dtos.HistoryItemResponse
 import com.serhij.mashi.data.repos.DatastoreRepo
 import com.serhij.mashi.data.repos.HistoryRepo
-import io.github.jan.supabase.auth.auth
-import io.ktor.util.Platform
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SettingsViewModel(
-    private val datastoreRepo: DatastoreRepo,
-    private val historyRepo: HistoryRepo
+class HistoryViewModel(
+    private val historyRepo: HistoryRepo,
+    private val datastoreRepo: DatastoreRepo
 ) : ViewModel() {
     val wallet = mutableStateOf<String?>(null)
 
@@ -43,13 +43,28 @@ class SettingsViewModel(
         }
     }
 
-    fun deleteHistoryByWallet(wallet: String) {
+    fun getHistoryStream(
+        wallet: String,
+        pageSize: Int = 10
+    ): Flow<PagingData<HistoryItemResponse>> {
+        return historyRepo.getHistoryStream(wallet, pageSize)
+            .cachedIn(viewModelScope)
+    }
+
+    fun deleteHistoryImage(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            historyRepo.deleteHistoryByWallet(wallet)
+            historyRepo.deleteHistoryImage(id)
         }
     }
 
-    fun disconnectDiscord(scope: CoroutineScope) {
-        scope.launch { supabase.auth.clearSession() }
+    fun getHistoryImageBytes(id: String, onResult: (ByteArray) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val bytes = historyRepo.getHistoryImageBytes(id)
+                onResult(bytes)
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
     }
 }

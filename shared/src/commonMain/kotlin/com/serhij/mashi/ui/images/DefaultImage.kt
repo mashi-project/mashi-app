@@ -21,7 +21,7 @@ import com.serhij.mashi.utils.config.RemoteConfig
 
 
 @Composable
-fun Image(
+fun DefaultImage(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     data: String,

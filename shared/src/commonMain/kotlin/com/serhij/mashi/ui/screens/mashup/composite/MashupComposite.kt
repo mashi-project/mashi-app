@@ -14,7 +14,7 @@ import com.serhij.mashi.data.models.colors.SelectedColors
 import com.serhij.mashi.data.models.traits.TraitDetails
 import com.serhij.mashi.data.models.traits.TraitType
 import com.serhij.mashi.data.states.image.ImageIntent
-import com.serhij.mashi.ui.images.Image
+import com.serhij.mashi.ui.images.DefaultImage
 import com.serhij.mashi.ui.theme.TraitShape
 
 @Composable
@@ -42,7 +42,7 @@ fun MashupComposite(
                 val contentScale =
                     if (traitType == TraitType.BACKGROUND) ContentScale.FillBounds else ContentScale.Fit
 
-                Image(
+                DefaultImage(
                     modifier = Modifier
                         .width(width)
                         .height(height),

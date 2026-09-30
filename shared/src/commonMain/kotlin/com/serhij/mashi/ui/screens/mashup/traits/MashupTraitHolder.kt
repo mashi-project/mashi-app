@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.serhij.mashi.data.models.mashup.MashupTrait
 import com.serhij.mashi.data.states.image.ImageIntent
 import com.serhij.mashi.data.states.mashup.MashupIntent
-import com.serhij.mashi.ui.images.Image
+import com.serhij.mashi.ui.images.DefaultImage
 import com.serhij.mashi.ui.theme.ContentAccentColor
 import com.serhij.mashi.ui.theme.ContentColor
 import com.serhij.mashi.ui.theme.ExtraSmallPadding
@@ -53,7 +53,7 @@ fun MashupTraitHolder(
                 )
                 .padding(4.dp),
         ) {
-            Image(
+            DefaultImage(
                 modifier = Modifier,
                 onClick = { processMashupIntent(MashupIntent.OnMashupUpdate(mashupTrait)) },
                 data = mashupTrait.trait.url ?: "",
