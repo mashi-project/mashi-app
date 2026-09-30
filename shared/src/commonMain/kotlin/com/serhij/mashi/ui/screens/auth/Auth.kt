@@ -22,11 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import com.serhij.mashi.app.supabase.Supabase.supabase
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.Discord
-import kotlinx.coroutines.launch
+import com.serhij.mashi.ui.screens.background.CollageBackground
 import mashi.shared.generated.resources.Res
 import mashi.shared.generated.resources.collage1
 import mashi.shared.generated.resources.collage2

@@ -20,7 +20,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.serhij.mashi.ui.screens.auth.CollageBackground
+import com.serhij.mashi.ui.screens.background.CollageBackground
 import mashi.shared.generated.resources.Res
 import mashi.shared.generated.resources.collage1
 import mashi.shared.generated.resources.collage2

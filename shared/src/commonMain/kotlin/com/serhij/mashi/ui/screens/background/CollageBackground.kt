@@ -1,4 +1,4 @@
-package com.serhij.mashi.ui.screens.auth
+package com.serhij.mashi.ui.screens.background
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize

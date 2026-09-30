@@ -17,5 +17,5 @@ val viewModelModule = module {
 
     viewModel<AppViewModel> { AppViewModel(get(), get()) }
 
-    viewModel<HistoryViewModel> { HistoryViewModel(get(), get()) }
+    viewModel<HistoryViewModel> { HistoryViewModel(get(), get(), get()) }
 }

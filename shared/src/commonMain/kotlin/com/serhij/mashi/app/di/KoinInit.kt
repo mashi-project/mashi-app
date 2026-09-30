@@ -2,6 +2,7 @@ package com.serhij.mashi.app.di
 
 import com.serhij.mashi.app.di.modules.localModule
 import com.serhij.mashi.app.di.modules.dbContextModule
+import com.serhij.mashi.app.di.modules.galleryModule
 import com.serhij.mashi.app.di.modules.remoteModule
 import com.serhij.mashi.app.di.modules.reposModule
 import com.serhij.mashi.app.di.modules.viewModelModule
@@ -18,7 +19,8 @@ fun initKoin(config: KoinAppDeclaration? = null): KoinApplication {
             remoteModule,
             dbContextModule,
             localModule,
-            reposModule
+            reposModule,
+            galleryModule
         )
     }
 }
