@@ -6,9 +6,9 @@ import com.serhij.mashi.ui.screens.history.History
 import com.serhij.mashi.ui.screens.mashup.Mashup
 import com.serhij.mashi.ui.screens.settings.Settings
 
-fun NavGraphBuilder.mainGraph(searchQ: String) {
+fun NavGraphBuilder.mainGraph(searchQueryProvider: () -> String) {
     composable<MainRoutes.Mashup> {
-        Mashup(searchQuery = searchQ)
+        Mashup(searchQuery = searchQueryProvider())
     }
 
     composable<MainRoutes.History> {

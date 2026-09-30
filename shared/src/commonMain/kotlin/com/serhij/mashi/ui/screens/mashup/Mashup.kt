@@ -59,8 +59,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun Mashup(searchQuery: String) {
     val viewModel = koinViewModel<MashupViewModel>()
-
-    val searchQueryValue by remember(searchQuery) { mutableStateOf(searchQuery) }
+    println(searchQuery)
 
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
@@ -79,6 +78,7 @@ fun Mashup(searchQuery: String) {
             mashupState.selectedColorType
         )
     }
+
 
     val currentColor = remember(
         selectedColorType,
@@ -107,8 +107,18 @@ fun Mashup(searchQuery: String) {
         }
     }
 
-    var nfts by remember {
-        mutableStateOf<List<Mashi>>(emptyList())
+    val nfts by remember(mashupState.nfts, searchQuery) {
+        derivedStateOf {
+            val temp = mashupState.nfts
+            if (searchQuery.isBlank()) {
+                temp
+            } else {
+                temp.filter {
+                    it.name.lowercase().contains(searchQuery.lowercase()) ||
+                            it.author.lowercase().contains(searchQuery.lowercase())
+                }
+            }
+        }
     }
 
     LaunchedEffect(mashupState.mashupDetails) {
@@ -125,26 +135,6 @@ fun Mashup(searchQuery: String) {
                     it.url == selectedBackground
                 } == true
             }
-    }
-
-    LaunchedEffect(
-        mashupState.nfts,
-        searchQueryValue,
-    ) {
-        val temp = mashupState.nfts.toList()
-
-        nfts = if (searchQueryValue.isEmpty()) {
-            temp
-        } else {
-            temp.filter {
-                it.name.lowercase().contains(
-                    searchQueryValue.lowercase()
-                ) ||
-                        it.author.lowercase().contains(
-                            searchQueryValue.lowercase()
-                        )
-            }
-        }
     }
 
     val selectedTraitUrl by remember(

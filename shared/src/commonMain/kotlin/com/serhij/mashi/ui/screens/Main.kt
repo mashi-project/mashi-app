@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.serhij.mashi.app.nav.MainRoutes
@@ -28,9 +29,7 @@ fun Main() {
     val navController = rememberNavController()
     var searchQ by remember { mutableStateOf("") }
 
-    val onSearchQChange = { q: String ->
-        searchQ = q
-    }
+    val onSearchQChange = { q: String -> searchQ = q }
 
     Scaffold(
         bottomBar = {
@@ -39,9 +38,16 @@ fun Main() {
                 onSearchQueryChange = onSearchQChange
             ) {
                 navController.navigate(it) {
-                    popUpTo(navController.graph.id) {
-                        inclusive = true
+                    // Pop up to the start destination of the graph to
+                    // avoid building up a massive back stack
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
                     }
+                    // Avoid multiple copies of the same destination when
+                    // reselecting the same bottom bar tab
+                    launchSingleTop = true
+                    // Restore state when reselecting a previously selected tab
+                    restoreState = true
                 }
             }
         }
@@ -59,7 +65,7 @@ fun Main() {
             exitTransition = { fadeOut() },
             enterTransition = { fadeIn() }
         ) {
-            mainGraph(searchQ)
+            mainGraph(searchQueryProvider = { searchQ })
         }
     }
 }
