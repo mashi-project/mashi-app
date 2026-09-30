@@ -203,6 +203,16 @@ class MashupViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val uiState = mashupState.value
             if (uiState.wallet.isNullOrEmpty()) return@launch
+
+            val res = mashitRepo.saveMashup(uiState.mashupDetails, uiState.wallet)
+            if (res?.success == true) {
+                val syncedMashup = collectionRepo.getMashup(uiState.wallet)
+                mashupState.value = mashupState.value.copy(
+                    mashupDetails = syncedMashup,
+                    colors = syncedMashup.colors
+                )
+                collectionRepo.cacheMashup(wallet = uiState.wallet, mashupDetails = syncedMashup)
+            }
         }
     }
 
@@ -298,7 +308,6 @@ class MashupViewModel(
             is ActionsIntent.OnReset -> onReset()
             is ActionsIntent.OnRedo -> onRedo()
             is ActionsIntent.OnUndo -> onUndo()
-            else -> {}
         }
     }
 

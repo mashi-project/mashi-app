@@ -19,6 +19,4 @@ sealed class ActionsIntent {
     object OnPreview : ActionsIntent()
 
     object OnPreviewDismiss : ActionsIntent()
-
-    object OnMashupGenerate : ActionsIntent()
 }

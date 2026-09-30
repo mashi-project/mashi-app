@@ -47,7 +47,8 @@ class MashupRepo(private val mashitApi: MashupApi) {
         )
         return try {
             mashitApi.saveMashup(request = req)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println(e.message)
             null
         }
     }
