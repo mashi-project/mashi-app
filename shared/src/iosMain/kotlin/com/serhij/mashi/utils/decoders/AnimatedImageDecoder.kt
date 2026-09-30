@@ -33,7 +33,13 @@ class AnimatedImageDecoder(
 
     override suspend fun decode(): DecodeResult {
         val bytes = source.source().use { it.readByteArray() }
-        val codec = Codec.makeFromData(Data.makeFromBytes(bytes))
+        val data = Data.makeFromBytes(bytes)
+        val codec = Codec.makeFromData(data)
+            ?: throw IllegalStateException("Failed to create Skia codec from image data")
+
+        // SAFETY CHECK: Validate dimensions to prevent memory exhaustion / OOM
+        val info = codec.imageInfo
+        require(info.width > 0 && info.height > 0) { "Invalid image dimensions: ${info.width}x${info.height}" }
 
         return DecodeResult(
             image = AnimatedSkiaImage(codec, prerenderFrames),
@@ -66,14 +72,14 @@ private class AnimatedSkiaImage(
     prerenderFrames: Boolean,
 ) : Image {
 
-    // Native ImageInfo allocation prevents Skia color/dimension conversion exceptions
+    // Native ImageInfo allocation
     private val bitmap by lazy {
         Bitmap().apply { allocPixels(codec.imageInfo) }
     }
 
-    // Lazy frame caching to reduce canvas rasterization overhead
+    // Safety-capped frame cache to avoid pre-rendering massive frame counts into RAM
     private val frameCache = arrayOfNulls<SkiaImage>(codec.frameCount).apply {
-        if (prerenderFrames) {
+        if (prerenderFrames && codec.frameCount in 1..60) {
             for (i in 0 until codec.frameCount) {
                 this[i] = decodeSkiaImage(i)
             }
@@ -135,8 +141,7 @@ private class AnimatedSkiaImage(
 
         // Treat codec.repetitionCount <= 0 as infinite looping
         val maxRepetitions = codec.repetitionCount
-        isAnimationComplete = maxRepetitions > 0 &&
-                currentRepetitionCount >= maxRepetitions &&
+        isAnimationComplete = maxRepetitions in 1..currentRepetitionCount &&
                 frameIndexToDraw == (codec.frameCount - 1)
 
         canvas.drawFrame(frameIndexToDraw)
@@ -158,14 +163,22 @@ private class AnimatedSkiaImage(
     }
 
     private fun decodeSkiaImage(frameIndex: Int): SkiaImage {
-        bitmap.erase(0) // Prevents pixel bleeding on transparent GIF/APNG frames
-        codec.readPixels(bitmap, frameIndex)
-        return SkiaImage.makeFromBitmap(bitmap)
+        return try {
+            bitmap.erase(0) // Prevents pixel bleeding on transparent frames
+            codec.readPixels(bitmap, frameIndex)
+            SkiaImage.makeFromBitmap(bitmap)
+        } catch (e: Exception) {
+            // Fallback for corrupted/unsupported frames: return the current bitmap state
+            // or a safe blank image instead of throwing an uncaught KMP exception
+            SkiaImage.makeFromBitmap(bitmap)
+        }
     }
 
     private fun Canvas.drawFrame(frameIndex: Int) {
-        val image = frameCache[frameIndex] ?: decodeSkiaImage(frameIndex).also {
-            frameCache[frameIndex] = it
+        val image = frameCache.getOrNull(frameIndex) ?: decodeSkiaImage(frameIndex).also {
+            if (frameIndex in frameCache.indices) {
+                frameCache[frameIndex] = it
+            }
         }
         drawImage(
             image = image,

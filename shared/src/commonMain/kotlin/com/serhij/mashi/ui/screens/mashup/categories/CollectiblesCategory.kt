@@ -24,19 +24,18 @@ fun CollectiblesCategory(
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         state = state,
         verticalArrangement = Arrangement.spacedBy(Padding)
     ) {
-        items(nfts.size) { i ->
+        items(
+            count = nfts.size,
+            key = { i -> "${nfts[i].name}-$i" } // Unique key combination prevents recycling crashes
+        ) { i ->
             val nft = nfts[i]
 
             CollectiblePreview(
                 nft = nft,
-                position = i,
-                state = state,
-                scope = scope,
                 mashupDetails = mashupDetails,
                 processMashupIntent = processMashupIntent,
                 processImageIntent = processImageIntent
