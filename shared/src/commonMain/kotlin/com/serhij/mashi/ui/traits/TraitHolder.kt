@@ -59,6 +59,7 @@ fun TraitHolder(
             text = trait.type.name
                 .lowercase()
                 .replace("_", " ")
+                .replace(" accessory", "")
                 .replaceFirstChar { c -> c.uppercaseChar() },
             color = ContentAccentColor,
             fontSize = 12.sp
