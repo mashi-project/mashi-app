@@ -54,15 +54,6 @@ fun SvgImage(
     }
 
     Box(modifier = modifier) {
-        if (currentBitmap == null && placeholderBitmap == null) {
-            Box(
-                modifier = modifier.matchParentSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingIndicator()
-            }
-        }
-
         placeholderBitmap?.let { placeholderBm ->
             Image(
                 bitmap = placeholderBm,
