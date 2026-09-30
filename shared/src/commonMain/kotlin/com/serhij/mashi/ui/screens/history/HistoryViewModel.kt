@@ -10,6 +10,7 @@ import com.serhij.mashi.data.remote.dtos.HistoryItemResponse
 import com.serhij.mashi.data.repos.DatastoreRepo
 import com.serhij.mashi.data.repos.HistoryRepo
 import com.serhij.mashi.utils.helpers.ImageGallerySaver
+import com.serhij.mashi.utils.helpers.ImageSharer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +23,8 @@ import kotlin.time.Clock
 class HistoryViewModel(
     private val historyRepo: HistoryRepo,
     private val datastoreRepo: DatastoreRepo,
-    private val imageGallerySaver: ImageGallerySaver
+    private val imageGallerySaver: ImageGallerySaver,
+    private val imageSharer: ImageSharer
 ) : ViewModel() {
     val wallet = mutableStateOf<String?>(null)
 
@@ -55,6 +57,17 @@ class HistoryViewModel(
                 val fileName = "mashi_${Clock.System.now().toEpochMilliseconds()}.${imageType.extension}"
 
                 imageGallerySaver.saveImage(bytes, fileName)
+            } catch (e: Exception) { }
+        }
+    }
+
+    fun onImageShare(imageType: ImageType, id: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val bytes = historyRepo.getHistoryImageBytes(id)
+                val fileName = "mashi_${Clock.System.now().toEpochMilliseconds()}.${imageType.extension}"
+
+                imageSharer.shareImage(bytes, fileName, "Share Image")
             } catch (e: Exception) { }
         }
     }

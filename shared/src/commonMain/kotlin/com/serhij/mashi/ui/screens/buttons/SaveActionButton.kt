@@ -1,4 +1,4 @@
-package com.serhij.mashi.ui.screens.mashup.actions.buttons
+package com.serhij.mashi.ui.screens.buttons
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape

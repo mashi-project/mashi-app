@@ -2,10 +2,10 @@ package com.serhij.mashi.ui.screens.history
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -18,8 +18,6 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.util.DebugLogger
-import com.serhij.mashi.ui.images.DefaultImage
-import com.serhij.mashi.ui.screens.mashup.composite.MashupComposite
 import com.serhij.mashi.ui.theme.SmallPadding
 import com.serhij.mashi.ui.theme.Surface
 import com.serhij.mashi.ui.theme.TraitShape
@@ -29,7 +27,9 @@ import com.serhij.mashi.utils.decoders.getAnimatedDecoderFactory
 @Composable
 fun HistoryItem(
     imageUrl: String,
-    modifier: Modifier = Modifier
+    onShare: () -> Unit,
+    onDownload: () -> Unit,
+    onDelete: () -> Unit
 ) {
     val ctx = LocalPlatformContext.current
 
@@ -46,23 +46,33 @@ fun HistoryItem(
             .build()
     }
 
-    Box(
-        modifier = Modifier.fillMaxWidth()
-            .height(XLHolderHeight)
-    ) {
+    Column {
         Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .clip(TraitShape)
-                .background(Surface),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            AsyncImage(
-                modifier = modifier,
-                model = request,
-                imageLoader = staticLoader,
-                contentDescription = null,
-                contentScale = ContentScale.FillHeight
-            )
+            Box(
+                modifier = Modifier
+                    .height(XLHolderHeight)
+                    .align(Alignment.Center)
+                    .clip(TraitShape)
+                    .background(Surface),
+            ) {
+                AsyncImage(
+                    modifier = Modifier.height(XLHolderHeight),
+                    model = request,
+                    imageLoader = staticLoader,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillHeight
+                )
+            }
         }
+
+        Spacer(modifier = Modifier.height(SmallPadding))
+
+        HistoryActionsPanel(
+            onShare = onShare,
+            onDelete = onDelete,
+            onDownload = onDownload,
+        )
     }
 }

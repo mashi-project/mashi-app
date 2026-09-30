@@ -1,11 +1,7 @@
 package com.serhij.mashi.ui.screens.history
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,8 +20,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.serhij.mashi.data.models.image.ImageType
 import com.serhij.mashi.data.remote.dtos.HistoryItemResponse
-import com.serhij.mashi.ui.theme.XLHolderHeight
-import com.serhij.mashi.ui.theme.XLHolderWidth
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,31 +30,40 @@ fun History() {
 
     val historyStream: LazyPagingItems<HistoryItemResponse>? =
         remember(wallet) {
-            wallet?.let { viewModel.getHistoryStream(it) }
+            wallet?.let {
+                viewModel.getHistoryStream(it)
+            }
         }?.collectAsLazyPagingItems()
-
-    var isRefreshing by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
 
-    LaunchedEffect(historyStream?.loadState?.refresh) {
+    var shouldScrollToTop by remember {
+        mutableStateOf(false)
+    }
+
+    val isRefreshing =
+        historyStream?.loadState?.refresh is LoadState.Loading
+
+    LaunchedEffect(
+        historyStream?.loadState?.refresh
+    ) {
         val items = historyStream ?: return@LaunchedEffect
 
         when (items.loadState.refresh) {
-            is LoadState.Loading -> {
-                isRefreshing = true
-            }
-
             is LoadState.NotLoading -> {
-                isRefreshing = false
-
-                if (items.itemCount > 0) {
+                if (shouldScrollToTop && items.itemCount > 0) {
                     listState.scrollToItem(0)
+                    shouldScrollToTop = false
                 }
             }
 
             is LoadState.Error -> {
-                isRefreshing = false
+                shouldScrollToTop = false
+            }
+
+            is LoadState.Loading -> {
+                // Nothing to do.
+                // isRefreshing is derived from loadState.
             }
         }
     }
@@ -68,7 +71,7 @@ fun History() {
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
-            isRefreshing = true
+            shouldScrollToTop = true
             historyStream?.refresh()
         },
         modifier = Modifier.fillMaxSize()
@@ -82,29 +85,50 @@ fun History() {
                 items(
                     count = historyStream.itemCount,
                     key = { index ->
-                        historyStream[index]?.id ?: "placeholder_$index"
+                        historyStream[index]?.id
+                            ?: "placeholder_$index"
                     }
                 ) { index ->
+
                     val item = historyStream[index]
 
+                    // IMPORTANT:
+                    // Don't render a Spacer when item == null.
+                    // Paging may temporarily return null while
+                    // loading/refreshing. Rendering a fixed-height
+                    // Spacer makes it look like the deleted item
+                    // is still occupying space.
                     if (item != null) {
                         HistoryItem(
                             imageUrl = item.imageUrl,
-                            modifier = Modifier
-                                .height(XLHolderHeight)
-                                .width(XLHolderWidth)
-                                .clickable {
-                                    viewModel.onSaveToGallery(
-                                        imageType = ImageType.valueOf(item.imageType),
-                                        id = item.id
-                                    )
-                                }
-                        )
-                    } else {
-                        Spacer(
-                            modifier = Modifier
-                                .height(XLHolderHeight)
-                                .width(XLHolderWidth)
+
+                            onDownload = {
+                                viewModel.onSaveToGallery(
+                                    imageType = ImageType.valueOf(
+                                        item.imageType
+                                    ),
+                                    id = item.id
+                                )
+                            },
+
+                            onShare = {
+                                viewModel.onImageShare(
+                                    imageType = ImageType.valueOf(
+                                        item.imageType
+                                    ),
+                                    id = item.id
+                                )
+                            },
+
+                            onDelete = {
+                                shouldScrollToTop = false
+
+                                viewModel.deleteHistoryImage(
+                                    item.id
+                                )
+
+                                historyStream.refresh()
+                            }
                         )
                     }
                 }

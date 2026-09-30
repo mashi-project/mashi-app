@@ -1,4 +1,4 @@
-package com.serhij.mashi.ui.screens.mashup.actions.buttons
+package com.serhij.mashi.ui.screens.buttons
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +34,7 @@ fun ActionButton(
     text: String? = null,
     onClick: () -> Unit,
     isAnimated: Boolean = false,
+    isRed: Boolean = false
 ) {
     var targetColor by remember { mutableStateOf(ContentAccentColor) }
     LaunchedEffect(isAnimated) {
@@ -65,7 +67,11 @@ fun ActionButton(
             ),
         shape = RoundedCornerShape(90),
         colors = IconButtonDefaults.iconButtonColors().copy(
-            containerColor = Secondary,
+            containerColor = if (!isRed) {
+                Secondary
+            } else {
+                MaterialTheme.colorScheme.error
+            },
             contentColor = ContentAccentColor,
         ),
         onClick = onClick,

@@ -1,4 +1,4 @@
-package com.serhij.mashi.ui.screens.mashup.actions.buttons
+package com.serhij.mashi.ui.screens.buttons
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

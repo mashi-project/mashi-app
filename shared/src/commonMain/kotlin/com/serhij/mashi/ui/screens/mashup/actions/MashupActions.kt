@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.serhij.mashi.data.models.mashup.MashupDetails
 import com.serhij.mashi.data.states.image.ImageIntent
 import com.serhij.mashi.data.states.mashup.ActionsIntent
-import com.serhij.mashi.ui.screens.mashup.actions.buttons.ActionButton
-import com.serhij.mashi.ui.screens.mashup.actions.buttons.SaveActionButton
+import com.serhij.mashi.ui.screens.buttons.ActionButton
+import com.serhij.mashi.ui.screens.buttons.SaveActionButton
 import com.serhij.mashi.ui.screens.mashup.composite.MashupComposite
 import com.serhij.mashi.ui.theme.SmallPadding
 import com.serhij.mashi.ui.theme.Surface

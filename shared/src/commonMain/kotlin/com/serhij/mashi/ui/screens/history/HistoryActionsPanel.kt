@@ -1,4 +1,4 @@
-package com.serhij.mashi.ui.screens.mashup.actions
+package com.serhij.mashi.ui.screens.history
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,11 +22,11 @@ import com.serhij.mashi.ui.screens.buttons.ColorSelectActionButton
 import com.serhij.mashi.ui.theme.SmallPadding
 
 @Composable
-fun ActionsPanel(
+fun HistoryActionsPanel(
     modifier: Modifier = Modifier,
-    isExpanded: Boolean,
-    onExpand: () -> Unit,
-    processActionsIntent: (ActionsIntent) -> Unit
+    onShare: () -> Unit,
+    onDelete: () -> Unit,
+    onDownload: () -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -33,37 +35,20 @@ fun ActionsPanel(
         Row(
             horizontalArrangement = Arrangement.spacedBy(SmallPadding)
         ) {
-            ColorSelectActionButton(onColor = { processActionsIntent(ActionsIntent.OnColor) })
-
             ActionButton(
                 icon = Icons.Default.Delete,
-                onClick = { processActionsIntent(ActionsIntent.OnReset) },
+                isRed = true,
+                onClick = onDelete,
             )
 
             ActionButton(
-                icon = Icons.Default.Refresh,
-                onClick = { processActionsIntent(ActionsIntent.OnRandom) }
+                icon = Icons.Default.Share,
+                onClick = onShare
             )
 
             ActionButton(
-                icon = Icons.AutoMirrored.Filled.Undo,
-                onClick = { processActionsIntent(ActionsIntent.OnUndo) },
-            )
-
-            ActionButton(
-                icon = Icons.AutoMirrored.Filled.Redo,
-                onClick = { processActionsIntent(ActionsIntent.OnRedo) }
-            )
-
-
-            ActionButton(
-                icon =
-                    if (!isExpanded) {
-                        Icons.Default.Download
-                    } else {
-                        Icons.Default.Clear
-                    },
-                onClick = onExpand,
+                icon = Icons.Default.Save,
+                onClick = onDownload
             )
         }
     }
