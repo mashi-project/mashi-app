@@ -35,7 +35,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.serhij.mashi.data.models.colors.ColorType
-import com.serhij.mashi.data.models.mashi.Mashi
+import com.serhij.mashi.data.models.image.ImageType
 import com.serhij.mashi.data.models.traits.TraitType
 import com.serhij.mashi.data.states.mashup.ActionsIntent
 import com.serhij.mashi.ui.grid.MashupTraitHolderGrid
@@ -44,6 +44,7 @@ import com.serhij.mashi.ui.screens.mashup.actions.MashupActions
 import com.serhij.mashi.ui.screens.mashup.categories.CategorySelector
 import com.serhij.mashi.ui.screens.mashup.categories.CollectiblesCategory
 import com.serhij.mashi.ui.screens.mashup.color.ColorSheet
+import com.serhij.mashi.ui.screens.mashup.dialog.GenerateDialog
 import com.serhij.mashi.ui.screens.mashup.preview.MashupPreview
 import com.serhij.mashi.ui.screens.mashup.sorting.Sorting
 import com.serhij.mashi.ui.theme.ContentAccentColor
@@ -63,6 +64,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun Mashup(searchQuery: String) {
     val viewModel = koinViewModel<MashupViewModel>()
     val isLoading by remember { viewModel.isLoading }
+    val isGenerate by remember { viewModel.isGenerateDialog }
 
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
@@ -386,6 +388,16 @@ fun Mashup(searchQuery: String) {
                 )
             }
         }
+    }
+
+    if (isGenerate) {
+        GenerateDialog(
+            onDismiss = { viewModel.closeDialog() },
+            onGenerate = { discord: Boolean, type: ImageType ->
+                viewModel.sendGenerationRequest(discord = discord, imageType = type)
+                viewModel.closeDialog()
+            }
+        )
     }
 
     if (isLoading) {

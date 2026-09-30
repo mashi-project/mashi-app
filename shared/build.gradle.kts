@@ -35,6 +35,10 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
+
+            export(libs.kmpnotifier.core)
+            export(libs.kmpnotifier.local)
+            export(libs.kmpnotifier.push.firebase)
         }
     }
 
@@ -120,6 +124,11 @@ kotlin {
 
             // Paging
             implementation(libs.androidx.paging.compose)
+
+            // Notifications
+            api(libs.kmpnotifier.push.firebase)
+            implementation(libs.kmpnotifier.core)
+            implementation(libs.kmpnotifier.local)
         }
         iosMain.dependencies {
             // KTOR

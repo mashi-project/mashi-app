@@ -15,6 +15,9 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.memory.MemoryCache
 import coil3.request.crossfade
 import coil3.util.DebugLogger
+import com.mmk.kmpnotifier.KMPNotifier
+import com.mmk.kmpnotifier.push.PushListener
+import com.mmk.kmpnotifier.push.firebase.addPushListener
 import com.serhij.mashi.app.supabase.Supabase.supabase
 import com.serhij.mashi.ui.screens.Main
 import com.serhij.mashi.ui.screens.auth.Auth
@@ -48,12 +51,28 @@ fun App() {
     }
 
     LaunchedEffect(Unit) {
+        // Push listener (onNewToken is required by the PushListener interface contract,
+        // but you don't have to do anything with the token if you don't need it)
+        KMPNotifier.addPushListener(object : PushListener {
+            override fun onNewToken(token: String) {
+                println("🔥 KMP FCM token: $token")
+            }
+
+            override fun onPushNotification(title: String?, body: String?) {
+                // Triggered when a push notification is received while app is open
+                println("Push received -> Title: $title, Body: $body")
+            }
+        })
+
         supabase.auth.sessionStatus.collect { status ->
             when (status) {
                 is SessionStatus.Authenticated -> {
                     val user = status.session.user
                     discordId = user?.userMetadata?.get("sub")?.jsonPrimitive?.content
-                    viewModel.setWalletById(discordId!!)
+
+                    if (discordId != null) {
+                        viewModel.setWalletById(discordId!!)
+                    }
                 }
 
                 is SessionStatus.NotAuthenticated -> {

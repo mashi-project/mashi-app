@@ -13,7 +13,7 @@ val viewModelModule = module {
 
     viewModel<SettingsViewModel> { SettingsViewModel(get(), get()) }
 
-    viewModel<MashupViewModel> { MashupViewModel(get(), get(), get(), get(), get()) }
+    viewModel<MashupViewModel> { MashupViewModel(get(), get(), get(), get(), get(), get()) }
 
     viewModel<AppViewModel> { AppViewModel(get(), get()) }
 

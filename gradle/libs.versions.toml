@@ -13,6 +13,7 @@ coilCompose = "3.6.3"
 composeMultiplatform = "1.12.1"
 datastoreCore = "1.2.1"
 junit = "4.13.2"
+kmpnotifierPushFirebase = "2.0.1"
 koinCore = "4.2.2"
 kotlin = "2.4.20"
 ktorClientCore = "3.6.0"
@@ -23,6 +24,7 @@ pagingCompose = "3.5.1"
 room3 = "3.1.0-alpha01"
 sqlite = "2.7.1"
 ksp = "2.3.5"
+google-services = "4.5.0"
 
 [libraries]
 androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastoreCore" }
@@ -35,6 +37,9 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCo
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
 coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coilCompose" }
+kmpnotifier-core = { module = "io.github.mirzemehdi:kmpnotifier-core", version.ref = "kmpnotifierPushFirebase" }
+kmpnotifier-local = { module = "io.github.mirzemehdi:kmpnotifier-local", version.ref = "kmpnotifierPushFirebase" }
+kmpnotifier-push-firebase = { module = "io.github.mirzemehdi:kmpnotifier-push-firebase", version.ref = "kmpnotifierPushFirebase" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinCore" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCore" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinCore" }
@@ -72,3 +77,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidx-room3 = { id = "androidx.room3", version.ref = "room3" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }

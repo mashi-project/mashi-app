@@ -2,6 +2,8 @@ package com.serhij.mashi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mmk.kmpnotifier.KMPNotifier
+import com.mmk.kmpnotifier.push.firebase.firebasePushNotifier
 import com.serhij.mashi.data.remote.MashiApi
 import com.serhij.mashi.data.repos.DatastoreRepo
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +20,7 @@ class AppViewModel(
     fun setWalletById(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val wallet = mashiApi.getWallet(id.toLong())
+            KMPNotifier.firebasePushNotifier.subscribeToTopic(wallet)
             datastoreRepo.updateWallet(wallet)
         }
     }

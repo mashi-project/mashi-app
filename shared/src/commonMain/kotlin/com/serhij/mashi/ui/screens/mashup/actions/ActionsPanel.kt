@@ -22,8 +22,6 @@ import com.serhij.mashi.ui.theme.SmallPadding
 @Composable
 fun ActionsPanel(
     modifier: Modifier = Modifier,
-    isExpanded: Boolean,
-    onExpand: () -> Unit,
     processActionsIntent: (ActionsIntent) -> Unit
 ) {
     Column(
@@ -57,13 +55,8 @@ fun ActionsPanel(
 
 
             ActionButton(
-                icon =
-                    if (!isExpanded) {
-                        Icons.Default.Download
-                    } else {
-                        Icons.Default.Clear
-                    },
-                onClick = onExpand,
+                icon = Icons.Default.Download,
+                onClick = { processActionsIntent(ActionsIntent.OnGenerate) },
             )
         }
     }

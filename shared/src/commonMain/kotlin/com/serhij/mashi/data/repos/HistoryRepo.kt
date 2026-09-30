@@ -3,6 +3,7 @@ package com.serhij.mashi.data.repos
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.serhij.mashi.data.models.image.ImageType
 import com.serhij.mashi.data.paging.HistoryPagingSource
 import com.serhij.mashi.data.remote.MashiApi
 import com.serhij.mashi.data.remote.dtos.HistoryItemResponse
@@ -15,6 +16,16 @@ class HistoryRepo(private val mashiApi: MashiApi) {
     suspend fun deleteHistoryImage(id: String) = mashiApi.deleteHistoryImage(id)
 
     suspend fun deleteHistoryByWallet(wallet: String) = mashiApi.deleteHistoryByWallet(wallet)
+
+    suspend fun generateMashup(
+        wallet: String,
+        imageType: ImageType? = null,
+        discord: Boolean = false
+    ) = mashiApi.generateMashup(
+        wallet = wallet,
+        imageType = imageType,
+        discord = discord
+    )
 
     fun getHistoryStream(wallet: String, pageSize: Int = 10): Flow<PagingData<HistoryItemResponse>> {
         return Pager(

@@ -24,6 +24,7 @@ interface MashiApi {
     suspend fun getHistoryImageBytes(id: String): ByteArray
     suspend fun deleteHistoryImage(id: String): Boolean
     suspend fun deleteHistoryByWallet(wallet: String): Boolean
+    suspend fun generateMashup(wallet: String, imageType: ImageType? = null, discord: Boolean = false): String
 }
 
 class MashiApiImpl(
@@ -60,5 +61,16 @@ class MashiApiImpl(
 
     override suspend fun deleteHistoryByWallet(wallet: String): Boolean {
         return client.delete("${baseUrl}api/mashi/app/history/delete/$wallet").status.value == 200
+    }
+
+    override suspend fun generateMashup(
+        wallet: String,
+        imageType: ImageType?,
+        discord: Boolean
+    ): String {
+        return client.get("${baseUrl}api/mashi/app/generate/$wallet") {
+            imageType?.let { parameter("type", it.name) }
+            parameter("discord", discord)
+        }.body()
     }
 }

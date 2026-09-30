@@ -1,6 +1,5 @@
 package com.serhij.mashi.ui.screens.mashup.actions
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,8 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import com.serhij.mashi.data.models.mashup.MashupDetails
 import com.serhij.mashi.data.states.image.ImageIntent
 import com.serhij.mashi.data.states.mashup.ActionsIntent
-import com.serhij.mashi.ui.screens.buttons.ActionButton
 import com.serhij.mashi.ui.screens.buttons.SaveActionButton
 import com.serhij.mashi.ui.screens.mashup.composite.MashupComposite
 import com.serhij.mashi.ui.theme.SmallPadding
@@ -40,8 +36,6 @@ fun MashupActions(
     processImageIntent: (ImageIntent) -> Unit,
     processActionsIntent: (ActionsIntent) -> Unit
 ) {
-    var isOpened by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -75,38 +69,12 @@ fun MashupActions(
                     .width(holderWidth + (40 * 2).dp + SmallPadding * 2),
                 horizontalArrangement = Arrangement.End
             ) {
-                Column {
-                    SaveActionButton(onSave = { processActionsIntent(ActionsIntent.OnSave) })
-
-                    AnimatedVisibility(visible = isOpened) {
-                        Column {
-                            Spacer(modifier = Modifier.height(SmallPadding))
-
-                            ActionButton(
-                                icon = Icons.Default.Download,
-                                text = "PNG",
-                                onClick = { }
-                            )
-
-                            Spacer(modifier = Modifier.height(SmallPadding))
-
-                            ActionButton(
-                                icon = Icons.Default.Download,
-                                text = "GIF",
-                                onClick = { },
-                                isAnimated = true
-                            )
-                        }
-                    }
-                }
+                SaveActionButton(onSave = { processActionsIntent(ActionsIntent.OnSave) })
             }
         }
 
         Spacer(modifier = Modifier.height(SmallPadding))
 
-        ActionsPanel(
-            processActionsIntent = processActionsIntent,
-            isExpanded = isOpened,
-            onExpand = { isOpened = !isOpened })
+        ActionsPanel(processActionsIntent = processActionsIntent)
     }
 }

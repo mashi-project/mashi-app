@@ -15,8 +15,10 @@ import com.serhij.mashi.data.models.mashup.MashupTrait
 import com.serhij.mashi.data.models.traits.SortType
 import com.serhij.mashi.data.models.traits.TraitType
 import com.serhij.mashi.data.remote.MashiApi
+import com.serhij.mashi.data.remote.dtos.SaveMashupRes
 import com.serhij.mashi.data.repos.CollectionRepo
 import com.serhij.mashi.data.repos.DatastoreRepo
+import com.serhij.mashi.data.repos.HistoryRepo
 import com.serhij.mashi.data.repos.ImageTypeRepo
 import com.serhij.mashi.data.repos.MashupRepo
 import com.serhij.mashi.data.states.image.ImageIntent
@@ -33,15 +35,18 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.definition.Callbacks
 
 class MashupViewModel(
     val collectionRepo: CollectionRepo,
     datastoreRepo: DatastoreRepo,
     private val mashitRepo: MashupRepo,
     private val imageTypeRepo: ImageTypeRepo,
-    private val mashiApi: MashiApi
+    private val mashiApi: MashiApi,
+    private val historyRepo: HistoryRepo
 ) : ViewModel() {
     val isLoading = mutableStateOf(false)
+    val isGenerateDialog = mutableStateOf(false)
 
     var mashupUiState = mutableStateOf(MashupUiState())
         private set
@@ -206,7 +211,16 @@ class MashupViewModel(
             if (uiState.wallet.isNullOrEmpty()) return@launch
 
             isLoading.value = true
-            val res = mashitRepo.saveMashup(uiState.mashupDetails, uiState.wallet)
+            mashitRepo.saveMashup(uiState.mashupDetails, uiState.wallet)
+
+            var resStatus = false
+            var res: SaveMashupRes? = null
+
+            while (!resStatus) {
+                res = mashitRepo.saveMashup(uiState.mashupDetails, uiState.wallet)
+                resStatus = res?.success == true
+            }
+
             if (res?.success == true) {
                 val syncedMashup = collectionRepo.getMashup(uiState.wallet)
                 mashupState.value = mashupState.value.copy(
@@ -311,7 +325,56 @@ class MashupViewModel(
             is ActionsIntent.OnReset -> onReset()
             is ActionsIntent.OnRedo -> onRedo()
             is ActionsIntent.OnUndo -> onUndo()
+            is ActionsIntent.OnGenerate -> onGenerate()
         }
+    }
+
+    private fun onGenerate() {
+        isGenerateDialog.value = true
+    }
+
+    fun sendGenerationRequest(discord: Boolean, imageType: ImageType) {
+        viewModelScope.launch((Dispatchers.IO)) {
+            try {
+                val uiState = mashupState.value
+                if (uiState.wallet.isNullOrEmpty()) return@launch
+
+                isLoading.value = true
+                mashitRepo.saveMashup(uiState.mashupDetails, uiState.wallet)
+
+                var resStatus = false
+                var res: SaveMashupRes? = null
+
+                while (!resStatus) {
+                    res = mashitRepo.saveMashup(uiState.mashupDetails, uiState.wallet)
+                    resStatus = res?.success == true
+                }
+
+                if (res?.success == true) {
+                    val syncedMashup = collectionRepo.getMashup(uiState.wallet)
+                    mashupState.value = mashupState.value.copy(
+                        mashupDetails = syncedMashup,
+                        colors = syncedMashup.colors
+                    )
+                    collectionRepo.cacheMashup(wallet = uiState.wallet, mashupDetails = syncedMashup)
+                }
+                isLoading.value = false
+
+                mashupState.value.wallet?.let {
+                    historyRepo.generateMashup(
+                        wallet = it,
+                        imageType = imageType,
+                        discord = discord
+                    )
+                }
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
+
+    fun closeDialog() {
+        isGenerateDialog.value = false
     }
 
     fun onCollectiblesSelect() {
