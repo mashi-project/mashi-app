@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -22,6 +23,7 @@ import com.serhij.mashi.ui.screens.mashup.composite.MashupComposite
 import com.serhij.mashi.ui.theme.SmallPadding
 import com.serhij.mashi.ui.theme.Surface
 import com.serhij.mashi.ui.theme.TraitShape
+import com.serhij.mashi.ui.theme.XLHolderHeight
 import com.serhij.mashi.utils.decoders.getAnimatedDecoderFactory
 
 @Composable
@@ -46,6 +48,7 @@ fun HistoryItem(
 
     Box(
         modifier = Modifier.fillMaxWidth()
+            .height(XLHolderHeight)
     ) {
         Box(
             modifier = Modifier
