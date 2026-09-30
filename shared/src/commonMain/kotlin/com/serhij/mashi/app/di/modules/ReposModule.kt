@@ -3,6 +3,7 @@ package com.serhij.mashi.app.di.modules
 import com.serhij.mashi.data.repos.AlchemyRepo
 import com.serhij.mashi.data.repos.CollectionRepo
 import com.serhij.mashi.data.repos.DatastoreRepo
+import com.serhij.mashi.data.repos.HistoryRepo
 import com.serhij.mashi.data.repos.ImageTypeRepo
 import com.serhij.mashi.data.repos.MashupRepo
 import com.serhij.mashi.data.repos.NftRepo
@@ -20,4 +21,6 @@ val reposModule = module {
     single<ImageTypeRepo> { ImageTypeRepo(get()) }
 
     single<DatastoreRepo> { DatastoreRepo(get()) }
+
+    single<HistoryRepo> { HistoryRepo(get()) }
 }

@@ -5,6 +5,7 @@ import com.serhij.mashi.data.remote.dtos.HistoryPageDto
 import com.serhij.mashi.utils.config.RemoteConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsBytes
@@ -21,6 +22,8 @@ interface MashiApi {
     suspend fun getImageType(imageId: String): ImageType
     suspend fun getImageBytes(imageId: String): ByteArray
     suspend fun getHistoryImageBytes(id: String): ByteArray
+    suspend fun deleteHistoryImage(id: String): Boolean
+    suspend fun deleteHistoryByWallet(wallet: String): Boolean
 }
 
 class MashiApiImpl(
@@ -50,4 +53,12 @@ class MashiApiImpl(
 
     override suspend fun getHistoryImageBytes(id: String): ByteArray =
         client.get("${baseUrl}api/mashi/app/history/image/$id").bodyAsBytes()
+
+    override suspend fun deleteHistoryImage(id: String): Boolean {
+        return client.delete("${baseUrl}api/mashi/app/history/image/delete/$id").status.value == 200
+    }
+
+    override suspend fun deleteHistoryByWallet(wallet: String): Boolean {
+        return client.delete("${baseUrl}api/mashi/app/history/delete/$wallet").status.value == 200
+    }
 }
