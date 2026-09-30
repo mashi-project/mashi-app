@@ -20,8 +20,9 @@ class AlchemyRepo(
 ) {
 
     suspend fun getCollection(wallet: String): List<Mashi> {
-        val nfts: MutableList<Mashi> = mutableListOf()
-        var key: String? = null
+        // Using a MutableMap for O(1) lookups to keep the merge logic fast
+        val nftMap = mutableMapOf<String, Mashi>()
+        var pageKey: String? = null
 
         try {
             while (true) {
@@ -29,46 +30,53 @@ class AlchemyRepo(
                     withMetadata = true,
                     owner = wallet,
                     contractAddress = RemoteConfig.MASHI_ADDRESS,
-                    pageKey = key
+                    pageKey = pageKey
                 )
 
                 val ownedNfts = data.ownedNfts
-                if (ownedNfts.isEmpty()) return emptyList()
+                if (ownedNfts.isEmpty()) break
 
-                ownedNfts.forEach { nft ->
-                    // Safely access raw and metadata using safe calls
+                for (nft in ownedNfts) {
                     val metadata = nft.raw?.metadata
                     var details = NftDetails("", "", -1)
+                    var compositeUrl = ""
+                    var traits: List<TraitDetails> = emptyList()
+
                     val tokenUri = nft.tokenUri.toFilebaseUri().toIpfsPartialUri()
 
-                    val assets = metadata?.assets ?: emptyList()
-                    val (compositeUrl: String, traits: List<TraitDetails>) = try {
-                        val url = metadata?.image?.fromIpfsScheme() ?: ""
-                        val traits = assets.toTraits()
-                        details = parseName(metadata?.name ?: "")
+                    // Populate initial values from Alchemy metadata if available
+                    metadata?.image?.let {
+                        compositeUrl = it.fromIpfsScheme()
+                    }
+                    metadata?.assets?.let {
+                        traits = it.toTraits()
+                    }
+                    metadata?.name?.let {
+                        details = parseName(it)
+                    }
 
-                        url to traits
-                    } catch (_: Exception) {
-                        val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
-
-                        val url = ipfsMetadata.image.fromIpfsScheme()
-                        val traits = ipfsMetadata.assets.map { asset ->
-                            TraitDetails(
-                                url = asset.uri.fromIpfsScheme(),
-                                type = TraitType.valueOf(asset.label.uppercase())
-                            )
-                        }
-                        details = parseName(ipfsMetadata.name)
-
-                        url to traits
-                    } finally {
-                        if (details.mint == -1 && tokenUri.isNotEmpty()) {
-                            try {
-                                val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
-                                details = parseName(ipfsMetadata.name)
-                            } catch (e: Exception) {
-                                println(e.message)
+                    if (metadata?.image == null || metadata?.assets == null || metadata?.name == null) {
+                        try {
+                            val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
+                            compositeUrl = ipfsMetadata.image.fromIpfsScheme()
+                            traits = ipfsMetadata.assets.map { asset ->
+                                TraitDetails(
+                                    url = asset.uri.fromIpfsScheme(),
+                                    type = TraitType.valueOf(asset.label.uppercase())
+                                )
                             }
+                            details = parseName(ipfsMetadata.name)
+                        } catch (e: Exception) {
+                            println("IPFS Fallback Error: ${e.message}")
+                        }
+                    }
+
+                    if (details.mint == -1 && tokenUri.isNotEmpty()) {
+                        try {
+                            val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
+                            details = parseName(ipfsMetadata.name)
+                        } catch (e: Exception) {
+                            println("Mint Parse Error: ${e.message}")
                         }
                     }
 
@@ -77,35 +85,30 @@ class AlchemyRepo(
                         timestamp = nft.timeLastUpdated ?: ""
                     )
 
-                    val tempNft = nfts.firstOrNull { existing -> existing.name == details.name }
+                    if (nftMap.containsKey(details.name)) {
+                        val existingNft = nftMap[details.name]!!
+                        val updatedOwned = (existingNft.owned ?: emptyList()) + currentOwned
 
-                    tempNft?.let {
-                        val owned = tempNft.owned?.toMutableList() ?: mutableListOf()
-                        owned.add(currentOwned)
-
-                        val updatedNft = tempNft.copy(owned = owned)
-
-                        nfts.remove(tempNft)
-                        nfts.add(updatedNft)
-
-                        return@forEach
-                    }
-
-                    nfts.add(
-                        Mashi(
+                        nftMap[details.name] = existingNft.copy(owned = updatedOwned)
+                    } else {
+                        nftMap[details.name] = Mashi(
                             name = details.name,
                             compositeUrl = compositeUrl,
                             traits = traits,
                             author = details.authorName,
                             owned = listOf(currentOwned)
                         )
-                    )
+                    }
                 }
 
-                key = data.pageKey
-                if (key == null) return nfts
+                pageKey = data.pageKey
+                if (pageKey == null) break
             }
+
+            return nftMap.values.toList()
+
         } catch (e: Exception) {
+            println("Error fetching collection: ${e.message}")
             return emptyList()
         }
     }

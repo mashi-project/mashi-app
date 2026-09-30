@@ -59,9 +59,8 @@ fun Image(
         if (imageType != null) {
             when (imageType) {
                 ImageType.SVG -> {
-
                     SvgImage(
-                        modifier = modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(),
                         data = newData,
                         selectedColors = selectedColors,
                         contentScale = contentScale
@@ -70,7 +69,7 @@ fun Image(
 
                 ImageType.WEBP -> {
                     NonSvgImage(
-                        modifier = modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(),
                         data = newData,
                         contentScale = contentScale
                     )

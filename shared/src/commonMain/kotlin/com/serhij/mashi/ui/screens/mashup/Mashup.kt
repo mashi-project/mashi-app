@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +43,7 @@ import com.serhij.mashi.ui.screens.mashup.categories.CollectiblesCategory
 import com.serhij.mashi.ui.screens.mashup.color.ColorSheet
 import com.serhij.mashi.ui.screens.mashup.preview.MashupPreview
 import com.serhij.mashi.ui.screens.mashup.sorting.Sorting
+import com.serhij.mashi.ui.theme.ContentAccentColor
 import com.serhij.mashi.ui.theme.MediumPadding
 import com.serhij.mashi.ui.theme.Padding
 import com.serhij.mashi.ui.theme.SmallPadding
@@ -262,37 +264,51 @@ fun Mashup(searchQuery: String) {
                             },
                     ) {
                         if (mashupUiState.isCollectionReady) {
-                            if (mashupUiState.isCollectibles) {
-                                CollectiblesCategory(
-                                    modifier = Modifier.weight(1f),
-                                    nfts = sortedNfts,
-                                    mashupDetails =
-                                        mashupState.mashupDetails,
-                                    state = collectiblesVState,
-                                    scope = scope,
-                                    processMashupIntent = {
-                                        viewModel.processMashupIntent(it)
-                                    },
-                                    processImageIntent = {
-                                        viewModel.processImageIntent(it)
-                                    },
-                                )
+                            if (sortedNfts.isEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Loading collectibles...",
+                                        color = ContentAccentColor
+                                    )
+                                }
                             } else {
-                                MashupTraitHolderGrid(
-                                    modifier = Modifier.weight(1f),
-                                    items = traits,
-                                    selectedTraitUrl = selectedTraitUrl,
-                                    state = traitsGridState,
-                                    spacedByHoriz = MediumPadding,
-                                    spacedByVert = MediumPadding,
-                                    columns = screenType.columns,
-                                    processImageIntent = {
-                                        viewModel.processImageIntent(it)
-                                    },
-                                    processMashupIntent = {
-                                        viewModel.processMashupIntent(it)
-                                    },
-                                )
+                                if (mashupUiState.isCollectibles) {
+                                    CollectiblesCategory(
+                                        modifier = Modifier.weight(1f),
+                                        nfts = sortedNfts,
+                                        mashupDetails =
+                                            mashupState.mashupDetails,
+                                        state = collectiblesVState,
+                                        scope = scope,
+                                        processMashupIntent = {
+                                            viewModel.processMashupIntent(it)
+                                        },
+                                        processImageIntent = {
+                                            viewModel.processImageIntent(it)
+                                        },
+                                    )
+                                } else {
+                                    MashupTraitHolderGrid(
+                                        modifier = Modifier.weight(1f),
+                                        items = traits,
+                                        selectedTraitUrl = selectedTraitUrl,
+                                        state = traitsGridState,
+                                        spacedByHoriz = MediumPadding,
+                                        spacedByVert = MediumPadding,
+                                        columns = screenType.columns,
+                                        processImageIntent = {
+                                            viewModel.processImageIntent(it)
+                                        },
+                                        processMashupIntent = {
+                                            viewModel.processMashupIntent(it)
+                                        },
+                                    )
+                                }
                             }
 
                             Row(
@@ -322,11 +338,22 @@ fun Mashup(searchQuery: String) {
                                 )
                             }
                         } else {
-
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Preparing collection...",
+                                    color = ContentAccentColor
+                                )
+                            }
                         }
                     }
                 }
             } else {
+                // Wallet not connected state placeholder if needed
             }
 
             if (mashupUiState.isColorChange) {

@@ -8,6 +8,6 @@ import com.serhij.mashi.utils.helpers.fromIpfsScheme
 fun List<AlchemyDto.OwnedNft.Raw.Metadata.Asset>.toTraits() = this.map { asset ->
     TraitDetails(
         url = asset.uri.fromIpfsScheme(),
-        type = TraitType.valueOf(asset.label.uppercase())
+        type = TraitType.valueOf(asset.label.uppercase().replace("-", "_"))
     )
 }

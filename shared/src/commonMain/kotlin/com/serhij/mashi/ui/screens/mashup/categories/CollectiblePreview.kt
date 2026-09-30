@@ -1,14 +1,17 @@
 package com.serhij.mashi.ui.screens.mashup.categories
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,7 +40,6 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import com.serhij.mashi.data.models.mashi.Mashi
 import com.serhij.mashi.data.models.mashup.MashupDetails
 import com.serhij.mashi.data.models.mashup.MashupTrait
@@ -49,7 +51,6 @@ import com.serhij.mashi.ui.theme.MediumPadding
 import com.serhij.mashi.ui.theme.Padding
 import com.serhij.mashi.ui.theme.Secondary
 import com.serhij.mashi.ui.theme.SmallPadding
-import com.serhij.mashi.ui.theme.TraitShape
 import com.serhij.mashi.ui.traits.TraitHolder
 import com.serhij.mashi.utils.helpers.detectScreenType
 import com.serhij.mashi.utils.helpers.getItemWidth
@@ -69,7 +70,9 @@ fun CollectiblePreview(
         mutableStateOf(false)
     }
 
-    BoxWithConstraints {
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxWidth()
+    ) {
         val screenType = maxWidth.detectScreenType()
 
         val width = getItemWidth(
@@ -88,7 +91,9 @@ fun CollectiblePreview(
         }
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize(), // <--- Fix: Animates layout bounds changes smoothly
         ) {
             Row(
                 modifier = Modifier
@@ -110,14 +115,6 @@ fun CollectiblePreview(
                         .padding(SmallPadding),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    AsyncImage(
-                        modifier = Modifier
-                            .height(48.dp)
-                            .clip(TraitShape),
-                        model = nft.compositeUrl,
-                        contentDescription = null,
-                    )
-
                     Spacer(
                         modifier = Modifier.width(SmallPadding)
                     )
@@ -168,15 +165,17 @@ fun CollectiblePreview(
                 visible = isExpanded,
             ) {
                 Column(
-                    modifier = Modifier.onPlaced {
-                        processMashupIntent(
-                            MashupIntent.OnCollectibleExpand(
-                                state = state,
-                                scope = scope,
-                                position = position,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onPlaced {
+                            processMashupIntent(
+                                MashupIntent.OnCollectibleExpand(
+                                    state = state,
+                                    scope = scope,
+                                    position = position,
+                                )
                             )
-                        )
-                    },
+                        },
                 ) {
                     Spacer(
                         modifier = Modifier.height(MediumPadding)
@@ -194,23 +193,43 @@ fun CollectiblePreview(
                         ),
                         maxItemsInEachRow = screenType.columns,
                     ) {
-                        nft.traits?.forEach { trait ->
-                            TraitHolder(
-                                modifier = Modifier.width(width),
-                                isSelected = isSelected(trait),
-                                trait = trait,
-                                processImageIntent = processImageIntent,
-                                onClick = {
-                                    processMashupIntent(
-                                        MashupIntent.OnMashupUpdate(
-                                            MashupTrait(
-                                                trait = trait,
-                                                avatarName = nft.name,
+                        if (nft.traits.isNullOrEmpty()) {
+                            // Show a loading/placeholder box while the NFT traits are loading
+                            repeat(3) { // Show a few placeholder cards
+                                Box(
+                                    modifier = Modifier
+                                        .width(width)
+                                        .aspectRatio(3f / 4f)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Secondary.copy(alpha = 0.3f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "...",
+                                        color = ContentAccentColor,
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        } else {
+                            nft.traits.forEach { trait ->
+                                TraitHolder(
+                                    modifier = Modifier.width(width),
+                                    isSelected = isSelected(trait),
+                                    trait = trait,
+                                    processImageIntent = processImageIntent,
+                                    onClick = {
+                                        processMashupIntent(
+                                            MashupIntent.OnMashupUpdate(
+                                                MashupTrait(
+                                                    trait = trait,
+                                                    avatarName = nft.name,
+                                                )
                                             )
                                         )
-                                    )
-                                },
-                            )
+                                    },
+                                )
+                            }
                         }
                     }
                 }
