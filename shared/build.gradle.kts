@@ -20,6 +20,7 @@ val keysProperties = Properties().apply {
 }
 
 
+
 // Helper getter with fallback to environment variables (useful for CI/CD)
 fun getSecret(key: String): String {
     return keysProperties.getProperty(key)

@@ -1,21 +1,87 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ---------- General ----------
+-keepattributes Signature, InnerClasses, EnclosingMethod, *Annotation*, SourceFile, LineNumberTable
+-keep class kotlin.Metadata { *; }
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Kotlin / coroutines
+-dontwarn kotlinx.coroutines.debug.**
+-dontwarn kotlin.reflect.jvm.internal.**
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ---------- kotlinx.serialization (Supabase models, your @Serializable classes) ----------
+-keepattributes RuntimeVisibleAnnotations, AnnotationDefault
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+-keepclassmembers @kotlinx.serialization.Serializable class ** {
+    *** Companion;
+    *** INSTANCE;
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-if @kotlinx.serialization.Serializable class **
+-keepclassmembers class <1> {
+    static <1>$Companion Companion;
+}
+-if @kotlinx.serialization.Serializable class ** {
+    static **$* *;
+}
+-keepclassmembers class <2>$<3> {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keep,includedescriptorclasses class com.serhij.mashi.**$$serializer { *; }
+-keepclassmembers class com.serhij.mashi.** {
+    *** Companion;
+}
+
+# Supabase / Postgrest decode models via generic type info
+-keep class io.github.jan.supabase.** { *; }
+-dontwarn io.github.jan.supabase.**
+
+# ---------- Ktor ----------
+-dontwarn org.slf4j.**
+-dontwarn java.lang.management.**
+-dontwarn io.netty.**
+-dontwarn org.apache.log4j.**
+-dontwarn org.apache.commons.logging.**
+-dontwarn reactor.blockhound.**
+-keep class io.ktor.** { *; }
+-keepclassmembers class io.ktor.** { volatile <fields>; }
+
+# ---------- OkHttp ----------
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+
+# ---------- Room 3 ----------
+-keep class * extends androidx.room3.RoomDatabase { <init>(); }
+-keep class * implements androidx.room3.RoomDatabaseConstructor { *; }
+-keep @androidx.room3.Entity class * { *; }
+-dontwarn androidx.room3.paging.**
+
+# Bundled SQLite (JNI)
+-keep class androidx.sqlite.driver.bundled.** { *; }
+-keepclasseswithmembernames class * { native <methods>; }
+
+# ---------- DataStore (protobuf-based internals) ----------
+-keepclassmembers class * extends androidx.datastore.preferences.protobuf.GeneratedMessageLite {
+    <fields>;
+}
+
+# ---------- Koin ----------
+-dontwarn org.koin.**
+-keepclassmembers class * extends androidx.lifecycle.ViewModel { <init>(...); }
+
+# ---------- KMPNotifier / Firebase ----------
+-keep class com.mmk.kmpnotifier.** { *; }
+-dontwarn com.mmk.kmpnotifier.**
+-keep class * extends com.google.firebase.messaging.FirebaseMessagingService { *; }
+
+# ---------- Coil 3 ----------
+-dontwarn coil3.PlatformContext
+
+# ---------- BuildKonfig ----------
+-keep class com.serhij.mashi.Keys { *; }
+
+# ---------- Optional: strip logs in release ----------
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int d(...);
+}
