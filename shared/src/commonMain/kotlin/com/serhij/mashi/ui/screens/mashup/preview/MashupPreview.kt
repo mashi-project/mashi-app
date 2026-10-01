@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.serhij.mashi.data.models.mashup.MashupDetails
 import com.serhij.mashi.data.models.screen.ScreenInfo
 import com.serhij.mashi.data.models.traits.OptionalTrait
-import com.serhij.mashi.data.models.traits.TraitDetails
-import com.serhij.mashi.data.models.traits.TraitType
 import com.serhij.mashi.data.states.image.ImageIntent
 import com.serhij.mashi.ui.grid.TraitHolderGrid
 import com.serhij.mashi.ui.theme.BottomSheetShape
@@ -127,7 +125,7 @@ fun MashupPreview(
                     spacedByHoriz = MediumPadding,
                     columns = screenType.columns,
                     processImageIntent = processImageIntent,
-                    onClick = {  }
+                    onClick = { }
                 )
             }
         }

@@ -22,7 +22,7 @@ import com.serhij.mashi.ui.nav.BottomNav
 import com.serhij.mashi.ui.theme.Background
 
 @Composable
-fun Main() {
+fun Main(isLurking: Boolean) {
     val navController = rememberNavController()
     var searchQ by remember { mutableStateOf("") }
 
@@ -62,7 +62,7 @@ fun Main() {
             exitTransition = { fadeOut() },
             enterTransition = { fadeIn() }
         ) {
-            mainGraph(searchQueryProvider = { searchQ })
+            mainGraph(isLurking = isLurking, searchQueryProvider = { searchQ })
         }
     }
 }

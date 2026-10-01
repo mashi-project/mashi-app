@@ -25,11 +25,13 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.serhij.mashi.data.models.image.ImageType
 import com.serhij.mashi.data.remote.dtos.HistoryItemResponse
+import com.serhij.mashi.ui.availability.Lurking
+import com.serhij.mashi.ui.availability.NotFound
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun History() {
+fun History(isLurking: Boolean) {
     val viewModel = koinViewModel<HistoryViewModel>()
     val wallet by remember { viewModel.wallet }
     val isLoading by remember { viewModel.isLoading }
@@ -74,72 +76,80 @@ fun History() {
         }
     }
 
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = {
-            shouldScrollToTop = true
-            historyStream?.refresh()
-        },
-        modifier = Modifier.fillMaxSize()
-    ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = listState,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+    if (!isLurking) {
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                shouldScrollToTop = true
+                historyStream?.refresh()
+            },
+            modifier = Modifier.fillMaxSize()
         ) {
-            if (historyStream != null) {
-                items(
-                    count = historyStream.itemCount,
-                    key = { index ->
-                        historyStream[index]?.id
-                            ?: "placeholder_$index"
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                if (historyStream != null) {
+                    items(
+                        count = historyStream.itemCount,
+                        key = { index ->
+                            historyStream[index]?.id
+                                ?: "placeholder_$index"
+                        }
+                    ) { index ->
+
+                        val item = historyStream[index]
+
+                        // IMPORTANT:
+                        // Don't render a Spacer when item == null.
+                        // Paging may temporarily return null while
+                        // loading/refreshing. Rendering a fixed-height
+                        // Spacer makes it look like the deleted item
+                        // is still occupying space.
+                        if (item != null) {
+                            HistoryItem(
+                                imageUrl = item.imageUrl,
+
+                                onDownload = {
+                                    viewModel.onSaveToGallery(
+                                        imageType = ImageType.valueOf(
+                                            item.imageType
+                                        ),
+                                        id = item.id
+                                    )
+                                },
+
+                                onShare = {
+                                    viewModel.onImageShare(
+                                        imageType = ImageType.valueOf(
+                                            item.imageType
+                                        ),
+                                        id = item.id
+                                    )
+                                },
+
+                                onDelete = {
+                                    shouldScrollToTop = false
+
+                                    viewModel.deleteHistoryImage(
+                                        item.id
+                                    )
+
+                                    historyStream.refresh()
+                                }
+                            )
+                        }
                     }
-                ) { index ->
 
-                    val item = historyStream[index]
-
-                    // IMPORTANT:
-                    // Don't render a Spacer when item == null.
-                    // Paging may temporarily return null while
-                    // loading/refreshing. Rendering a fixed-height
-                    // Spacer makes it look like the deleted item
-                    // is still occupying space.
-                    if (item != null) {
-                        HistoryItem(
-                            imageUrl = item.imageUrl,
-
-                            onDownload = {
-                                viewModel.onSaveToGallery(
-                                    imageType = ImageType.valueOf(
-                                        item.imageType
-                                    ),
-                                    id = item.id
-                                )
-                            },
-
-                            onShare = {
-                                viewModel.onImageShare(
-                                    imageType = ImageType.valueOf(
-                                        item.imageType
-                                    ),
-                                    id = item.id
-                                )
-                            },
-
-                            onDelete = {
-                                shouldScrollToTop = false
-
-                                viewModel.deleteHistoryImage(
-                                    item.id
-                                )
-
-                                historyStream.refresh()
-                            }
-                        )
+                    if (historyStream.itemCount == 0) {
+                        item { NotFound(modifier = Modifier.fillMaxSize()) }
                     }
                 }
             }
         }
+    } else {
+        Lurking(modifier = Modifier.fillMaxSize())
     }
 
     if (isLoading) {
@@ -156,5 +166,5 @@ fun History() {
 @Preview
 @Composable
 private fun HistoryPreview() {
-    History()
+    History(isLurking = false)
 }

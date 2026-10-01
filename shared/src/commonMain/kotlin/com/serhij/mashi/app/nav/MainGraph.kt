@@ -6,16 +6,16 @@ import com.serhij.mashi.ui.screens.history.History
 import com.serhij.mashi.ui.screens.mashup.Mashup
 import com.serhij.mashi.ui.screens.settings.Settings
 
-fun NavGraphBuilder.mainGraph(searchQueryProvider: () -> String) {
+fun NavGraphBuilder.mainGraph(searchQueryProvider: () -> String, isLurking: Boolean) {
     composable<MainRoutes.Mashup> {
-        Mashup(searchQuery = searchQueryProvider())
+        Mashup(searchQuery = searchQueryProvider(), isLurking = isLurking)
     }
 
     composable<MainRoutes.History> {
-        History()
+        History(isLurking = isLurking)
     }
 
     composable<MainRoutes.Settings> {
-        Settings()
+        Settings(isLurking = isLurking)
     }
 }

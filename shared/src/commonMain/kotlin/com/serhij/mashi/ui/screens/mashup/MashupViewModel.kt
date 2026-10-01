@@ -46,6 +46,7 @@ class MashupViewModel(
 ) : ViewModel() {
     val isLoading = mutableStateOf(false)
     val isGenerateDialog = mutableStateOf(false)
+    val isDiscord = datastoreRepo.discordFlow
 
     var mashupUiState = mutableStateOf(MashupUiState())
         private set

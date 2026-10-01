@@ -23,6 +23,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,10 +68,11 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Mashup(searchQuery: String) {
+fun Mashup(searchQuery: String, isLurking: Boolean) {
     val viewModel = koinViewModel<MashupViewModel>()
     val isLoading by remember { viewModel.isLoading }
     val isGenerate by remember { viewModel.isGenerateDialog }
+    val isDiscord by viewModel.isDiscord.collectAsState(false)
 
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
@@ -361,6 +363,7 @@ fun Mashup(searchQuery: String) {
 
     if (isGenerate) {
         GenerateDialog(
+            isDiscord = isDiscord,
             onDismiss = { viewModel.closeDialog() },
             onGenerate = { discord: Boolean, type: ImageType ->
                 viewModel.sendGenerationRequest(discord = discord, imageType = type)

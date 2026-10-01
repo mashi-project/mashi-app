@@ -32,9 +32,10 @@ import com.serhij.mashi.ui.theme.ContentAccentColor
 @Composable
 fun GenerateDialog(
     onGenerate: (Boolean, ImageType) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    isDiscord: Boolean
 ) {
-    var checked by remember { mutableStateOf(false) }
+    var checked by remember { mutableStateOf(isDiscord) }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(

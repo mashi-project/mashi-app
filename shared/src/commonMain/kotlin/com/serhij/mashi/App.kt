@@ -87,7 +87,7 @@ fun App() {
     MaterialTheme {
         Column {
             if (wallet != null && discordId != null) {
-                Main()
+                Main(isLurking = false)
             } else {
                 Auth()
             }

@@ -21,6 +21,7 @@ class SettingsViewModel(
     val wallet = mutableStateOf<String?>(null)
 
     val walletFlow = datastoreRepo.walletFlow
+    val discordFlow = datastoreRepo.discordFlow
 
     init {
         observeWallet()
@@ -39,6 +40,12 @@ class SettingsViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun updateDiscord(enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            datastoreRepo.updateDiscord(enabled)
         }
     }
 

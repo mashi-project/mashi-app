@@ -46,6 +46,18 @@ class DatastoreRepo(private val datastore: DataStore<Preferences>) {
                 preferences[PreferencesKeys.NOTIFICATIONS] ?: false
             }
 
+    val discordFlow: Flow<Boolean> =
+        datastore.data
+            .catch { e ->
+                if (e is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                }
+            }
+            .map { preferences ->
+                preferences[PreferencesKeys.DISCORD] ?: false
+            }
+
     suspend fun updateWallet(wallet: String) {
         datastore.edit { preferences -> preferences[PreferencesKeys.WALLET] = wallet }
     }
@@ -63,6 +75,12 @@ class DatastoreRepo(private val datastore: DataStore<Preferences>) {
     suspend fun updateNotifications(enabled: Boolean) {
         datastore.edit { preferences ->
             preferences[PreferencesKeys.NOTIFICATIONS] = enabled
+        }
+    }
+
+    suspend fun updateDiscord(enabled: Boolean) {
+        datastore.edit { preferences ->
+            preferences[PreferencesKeys.DISCORD] = enabled
         }
     }
 }
