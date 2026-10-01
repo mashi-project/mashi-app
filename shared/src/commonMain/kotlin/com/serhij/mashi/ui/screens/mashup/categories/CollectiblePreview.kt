@@ -16,9 +16,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import com.serhij.mashi.data.models.mashi.Mashi
 import com.serhij.mashi.data.models.mashup.MashupDetails
 import com.serhij.mashi.data.models.mashup.MashupTrait
-import com.serhij.mashi.data.models.traits.TraitDetails
 import com.serhij.mashi.data.states.image.ImageIntent
 import com.serhij.mashi.data.states.mashup.MashupIntent
 import com.serhij.mashi.ui.theme.ContentAccentColor
@@ -37,8 +42,12 @@ import com.serhij.mashi.ui.theme.Padding
 import com.serhij.mashi.ui.theme.Secondary
 import com.serhij.mashi.ui.theme.SmallPadding
 import com.serhij.mashi.ui.traits.TraitHolder
+import com.serhij.mashi.utils.decoders.AnimationGate
 import com.serhij.mashi.utils.helpers.detectScreenType
 import com.serhij.mashi.utils.helpers.getItemWidth
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun CollectiblePreview(
@@ -59,11 +68,11 @@ fun CollectiblePreview(
             initialPadding = -Padding,
         )
 
-        val isSelected: (TraitDetails) -> Boolean = { trait ->
-            val sameTypeTrait = mashupDetails.assets.find {
-                it.type == trait.type
-            }
-            sameTypeTrait?.url == trait.url
+        // Built once per asset change (O(1) lookup per item) instead of a
+        // linear `find` for every trait on every recomposition.
+        val selectedUrlByType = remember(mashupDetails.assets) {
+            // Reversed so the FIRST asset of each type wins (same as the old `find`).
+            mashupDetails.assets.asReversed().associate { it.type to it.url }
         }
 
         Column(
@@ -105,14 +114,50 @@ fun CollectiblePreview(
 
             val traitsList = nft.traits ?: emptyList()
 
+            val rowState = rememberLazyListState()
+
+            // Tracks whether THIS row currently holds the gate, so disposing a row
+            // (e.g. when the vertical list scrolls it away) never un-pauses
+            // animations that the vertical scroll is still holding paused.
+            val ownsGate = remember { booleanArrayOf(false) }
+
+            // Reads state inside snapshotFlow, so this composable does not recompose on scroll.
+            LaunchedEffect(rowState) {
+                snapshotFlow { rowState.isScrollInProgress }
+                    .distinctUntilChanged()
+                    .collectLatest { scrolling ->
+                        if (scrolling) {
+                            ownsGate[0] = true
+                            AnimationGate.paused = true
+                        } else if (ownsGate[0]) {
+                            delay(120) // avoids flicker between fling segments
+                            ownsGate[0] = false
+                            AnimationGate.paused = false
+                        }
+                    }
+            }
+            DisposableEffect(rowState) {
+                onDispose {
+                    if (ownsGate[0]) {
+                        ownsGate[0] = false
+                        AnimationGate.paused = false
+                    }
+                }
+            }
+
             // Horizontal LazyRow ensures minimal memory usage per item row
             LazyRow(
+                state = rowState,
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(11.5.dp),
                 contentPadding = PaddingValues(horizontal = 0.dp)
             ) {
                 if (traitsList.isEmpty()) {
-                    items(3, key = { "placeholder_$it" }) {
+                    items(
+                        count = 3,
+                        key = { "placeholder_$it" },
+                        contentType = { "placeholder" },
+                    ) {
                         Box(
                             modifier = Modifier
                                 .width(width)
@@ -121,21 +166,18 @@ fun CollectiblePreview(
                                 .background(Secondary.copy(alpha = 0.3f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "...",
-                                color = ContentAccentColor,
-                                fontSize = 14.sp
-                            )
+                            LoadingIndicator()
                         }
                     }
                 } else {
                     items(
                         items = traitsList,
-                        key = { trait -> "${trait.url}-${trait.type}" }
+                        key = { trait -> "${trait.url}-${trait.type}" },
+                        contentType = { "trait" },
                     ) { trait ->
                         TraitHolder(
                             modifier = Modifier.width(width),
-                            isSelected = isSelected(trait),
+                            isSelected = selectedUrlByType[trait.type] == trait.url,
                             trait = trait,
                             processImageIntent = processImageIntent,
                             onClick = {

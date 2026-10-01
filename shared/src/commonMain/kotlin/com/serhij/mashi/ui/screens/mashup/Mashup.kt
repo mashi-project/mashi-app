@@ -21,6 +21,7 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -28,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,10 +55,14 @@ import com.serhij.mashi.ui.theme.Padding
 import com.serhij.mashi.ui.theme.SmallPadding
 import com.serhij.mashi.ui.theme.XLHolderHeight
 import com.serhij.mashi.ui.theme.XLHolderWidth
+import com.serhij.mashi.utils.decoders.AnimationGate
 import com.serhij.mashi.utils.helpers.detectScreenType
 import com.serhij.mashi.utils.helpers.getTraitsByType
 import com.serhij.mashi.utils.helpers.sortNfts
 import com.serhij.mashi.utils.helpers.toHexColor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,17 +84,33 @@ fun Mashup(searchQuery: String) {
     val mashupUiState by remember { viewModel.mashupUiState }
     val mashupState by remember { viewModel.mashupState }
 
-    val selectedColorType by remember(mashupState.selectedColorType) {
-        mutableStateOf(
-            mashupState.selectedColorType
-        )
+    val selectedColorType = mashupState.selectedColorType
+
+    // Drive the animation gate from a snapshotFlow so scrolling start/stop
+    // does NOT recompose this whole screen.
+    val isCollectibles = mashupUiState.isCollectibles
+    LaunchedEffect(isCollectibles) {
+        snapshotFlow {
+            if (isCollectibles) collectiblesVState.isScrollInProgress
+            else traitsGridState.isScrollInProgress
+        }
+            .distinctUntilChanged()
+            .collectLatest { scrolling ->
+                if (scrolling) {
+                    AnimationGate.paused = true
+                } else {
+                    delay(120) // avoids flicker between fling segments
+                    AnimationGate.paused = false
+                }
+            }
     }
 
+    // Don't leave animations frozen if the screen is left mid-scroll
+    DisposableEffect(Unit) {
+        onDispose { AnimationGate.paused = false }
+    }
 
-    val currentColor = remember(
-        selectedColorType,
-        mashupState.colors,
-    ) {
+    val currentColor = remember(selectedColorType, mashupState.colors) {
         when (selectedColorType) {
             ColorType.BASE -> mashupState.colors.base
             ColorType.EYES -> mashupState.colors.eyes
@@ -96,50 +118,31 @@ fun Mashup(searchQuery: String) {
         }
     }
 
-    val previousColor = remember(
-        mashupState.mashupDetails,
-        selectedColorType,
-    ) {
+    val previousColor = remember(mashupState.mashupDetails, selectedColorType) {
         when (selectedColorType) {
-            ColorType.BASE ->
-                mashupState.mashupDetails.colors.base
-
-            ColorType.EYES ->
-                mashupState.mashupDetails.colors.eyes
-
-            ColorType.HAIR ->
-                mashupState.mashupDetails.colors.hair
+            ColorType.BASE -> mashupState.mashupDetails.colors.base
+            ColorType.EYES -> mashupState.mashupDetails.colors.eyes
+            ColorType.HAIR -> mashupState.mashupDetails.colors.hair
         }
+    }
+
+    // Created once per change instead of on every recomposition.
+    val mashupDetailsWithColors = remember(mashupState.mashupDetails, mashupState.colors) {
+        mashupState.mashupDetails.copy(colors = mashupState.colors)
     }
 
     val nfts by remember(mashupState.nfts, searchQuery) {
         derivedStateOf {
-            val temp = mashupState.nfts
-            if (searchQuery.isBlank()) {
-                temp
+            val q = searchQuery.trim().lowercase()
+            if (q.isEmpty()) {
+                mashupState.nfts
             } else {
-                temp.filter {
-                    it.name.lowercase().contains(searchQuery.lowercase()) ||
-                            it.author.lowercase().contains(searchQuery.lowercase())
+                mashupState.nfts.filter {
+                    it.name.contains(q, ignoreCase = true) ||
+                            it.author.contains(q, ignoreCase = true)
                 }
             }
         }
-    }
-
-    LaunchedEffect(mashupState.mashupDetails) {
-        val selectedBackground =
-            mashupState.mashupDetails.assets
-                .first {
-                    it.type == TraitType.BACKGROUND
-                }
-                .url
-
-        val selectedNft =
-            nfts.firstOrNull { nft ->
-                nft.traits?.any {
-                    it.url == selectedBackground
-                } == true
-            }
     }
 
     val selectedTraitUrl by remember(
@@ -148,57 +151,35 @@ fun Mashup(searchQuery: String) {
     ) {
         derivedStateOf {
             mashupState.mashupDetails.assets
-                .first {
-                    it.type == mashupState.selectedCategory
-                }
+                .first { it.type == mashupState.selectedCategory }
                 .url
                 ?: ""
         }
     }
 
-    val sortedNfts = remember(
-        mashupState.sortType,
-        nfts,
-    ) {
-        sortNfts(
-            mashupState.sortType,
-            nfts,
-        )
+    val sortedNfts = remember(mashupState.sortType, nfts) {
+        sortNfts(mashupState.sortType, nfts)
     }
 
-    val traits by remember(
-        mashupState.selectedCategory,
-        sortedNfts,
-    ) {
-        derivedStateOf {
-            val traits =
-                getTraitsByType(sortedNfts)[mashupState.selectedCategory]
-                    ?: emptyList()
+    // Group once per list change, not on every category switch.
+    val traitsByType = remember(sortedNfts) { getTraitsByType(sortedNfts) }
 
-            if (
-                mashupState.selectedCategory !=
-                TraitType.BACKGROUND
-            ) {
-                traits.distinctBy {
-                    it.avatarName
-                }
-            } else {
-                traits
-            }
+    val traits = remember(traitsByType, mashupState.selectedCategory) {
+        val list = traitsByType[mashupState.selectedCategory] ?: emptyList()
+        if (mashupState.selectedCategory != TraitType.BACKGROUND) {
+            list.distinctBy { it.avatarName }
+        } else {
+            list
         }
     }
 
-    LaunchedEffect(
-        mashupUiState.isCollectibles,
-    ) {
+    LaunchedEffect(mashupUiState.isCollectibles) {
         if (mashupUiState.isCollectibles) {
             collectiblesVState.animateScrollToItem(0)
         }
     }
 
-    val isSync by remember {
-        viewModel.isSync
-    }
+    val isSync by remember { viewModel.isSync }
 
     BoxWithConstraints {
         val screenType = maxWidth.detectScreenType()
@@ -222,11 +203,7 @@ fun Mashup(searchQuery: String) {
                         }
 
                         MashupActions(
-                            mashupDetails = mashupState
-                                .mashupDetails
-                                .copy(
-                                    colors = mashupState.colors
-                                ),
+                            mashupDetails = mashupDetailsWithColors,
                             modifier = Modifier
                                 .height(XLHolderHeight)
                                 .width(XLHolderWidth)
@@ -276,8 +253,7 @@ fun Mashup(searchQuery: String) {
                                     CollectiblesCategory(
                                         modifier = Modifier.weight(1f),
                                         nfts = sortedNfts,
-                                        mashupDetails =
-                                            mashupState.mashupDetails,
+                                        mashupDetails = mashupState.mashupDetails,
                                         state = collectiblesVState,
                                         scope = scope,
                                         processMashupIntent = {
@@ -307,11 +283,8 @@ fun Mashup(searchQuery: String) {
                             }
 
                             Row(
-                                modifier = Modifier.padding(
-                                    vertical = SmallPadding
-                                ),
-                                verticalAlignment =
-                                    Alignment.CenterVertically,
+                                modifier = Modifier.padding(vertical = SmallPadding),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Sorting { type ->
                                     viewModel.changeSortType(
@@ -376,11 +349,7 @@ fun Mashup(searchQuery: String) {
                         )
                     },
                     sheetState = previewState,
-                    mashupDetails = mashupState
-                        .mashupDetails
-                        .copy(
-                            colors = mashupState.colors
-                        ),
+                    mashupDetails = mashupDetailsWithColors,
                     processImageIntent = {
                         viewModel.processImageIntent(it)
                     },
@@ -402,7 +371,8 @@ fun Mashup(searchQuery: String) {
 
     if (isLoading) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.3F)),
             contentAlignment = Alignment.Center
         ) {
