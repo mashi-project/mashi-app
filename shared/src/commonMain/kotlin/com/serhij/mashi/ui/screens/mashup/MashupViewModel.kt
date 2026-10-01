@@ -35,7 +35,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.definition.Callbacks
 
 class MashupViewModel(
     val collectionRepo: CollectionRepo,
@@ -356,7 +355,10 @@ class MashupViewModel(
                         mashupDetails = syncedMashup,
                         colors = syncedMashup.colors
                     )
-                    collectionRepo.cacheMashup(wallet = uiState.wallet, mashupDetails = syncedMashup)
+                    collectionRepo.cacheMashup(
+                        wallet = uiState.wallet,
+                        mashupDetails = syncedMashup
+                    )
                 }
                 isLoading.value = false
 

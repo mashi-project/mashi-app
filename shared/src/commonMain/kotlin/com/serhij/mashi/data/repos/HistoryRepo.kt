@@ -27,7 +27,10 @@ class HistoryRepo(private val mashiApi: MashiApi) {
         discord = discord
     )
 
-    fun getHistoryStream(wallet: String, pageSize: Int = 10): Flow<PagingData<HistoryItemResponse>> {
+    fun getHistoryStream(
+        wallet: String,
+        pageSize: Int = 10
+    ): Flow<PagingData<HistoryItemResponse>> {
         return Pager(
             config = PagingConfig(
                 pageSize = pageSize,

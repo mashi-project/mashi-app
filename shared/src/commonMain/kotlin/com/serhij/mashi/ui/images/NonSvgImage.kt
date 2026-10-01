@@ -2,8 +2,6 @@ package com.serhij.mashi.ui.images
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -13,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import coil3.ImageLoader
-import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
@@ -21,8 +18,6 @@ import coil3.compose.SubcomposeAsyncImageContent
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.util.DebugLogger
-import com.serhij.mashi.ui.theme.XLHolderHeight
-import com.serhij.mashi.ui.theme.XLHolderWidth
 import com.serhij.mashi.utils.decoders.getAnimatedDecoderFactory
 
 @Composable
@@ -64,6 +59,7 @@ fun NonSvgImage(
                     LoadingIndicator()
                 }
             }
+
             else -> {
                 SubcomposeAsyncImageContent()
             }

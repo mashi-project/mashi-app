@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.time.Clock
 
 class HistoryViewModel(
@@ -56,11 +55,13 @@ class HistoryViewModel(
             try {
                 isLoading.value = true
                 val bytes = historyRepo.getHistoryImageBytes(id)
-                val fileName = "mashi_${Clock.System.now().toEpochMilliseconds()}.${imageType.extension}"
+                val fileName =
+                    "mashi_${Clock.System.now().toEpochMilliseconds()}.${imageType.extension}"
                 isLoading.value = false
 
                 imageGallerySaver.saveImage(bytes, fileName)
-            } catch (e: Exception) { }
+            } catch (e: Exception) {
+            }
         }
     }
 
@@ -69,11 +70,13 @@ class HistoryViewModel(
             try {
                 isLoading.value = true
                 val bytes = historyRepo.getHistoryImageBytes(id)
-                val fileName = "mashi_${Clock.System.now().toEpochMilliseconds()}.${imageType.extension}"
+                val fileName =
+                    "mashi_${Clock.System.now().toEpochMilliseconds()}.${imageType.extension}"
                 isLoading.value = false
 
                 imageSharer.shareImage(bytes, fileName, "Share Image")
-            } catch (e: Exception) { }
+            } catch (e: Exception) {
+            }
         }
     }
 

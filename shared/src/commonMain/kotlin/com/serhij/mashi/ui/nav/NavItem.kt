@@ -16,12 +16,13 @@ fun NavItem(
     IconButton(
         onClick = { onNavigation.invoke(navItemDetails.route) },
         colors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Black.copy(alpha = 0.05F)
+            containerColor = Color.White.copy(alpha = 0.05F)
         )
     ) {
         Icon(
             imageVector = navItemDetails.icon,
-            contentDescription = null
+            contentDescription = null,
+            tint = Color.White
         )
     }
 }

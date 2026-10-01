@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,9 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import com.serhij.mashi.app.nav.MainRoutes
 import com.serhij.mashi.app.nav.mainGraph
 import com.serhij.mashi.ui.nav.BottomNav
-import com.serhij.mashi.AppViewModel
 import com.serhij.mashi.ui.theme.Background
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun Main() {

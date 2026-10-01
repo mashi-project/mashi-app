@@ -24,7 +24,11 @@ interface MashiApi {
     suspend fun getHistoryImageBytes(id: String): ByteArray
     suspend fun deleteHistoryImage(id: String): Boolean
     suspend fun deleteHistoryByWallet(wallet: String): Boolean
-    suspend fun generateMashup(wallet: String, imageType: ImageType? = null, discord: Boolean = false): String
+    suspend fun generateMashup(
+        wallet: String,
+        imageType: ImageType? = null,
+        discord: Boolean = false
+    ): String
 }
 
 class MashiApiImpl(

@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.ui.graphics.Color
 import com.serhij.mashi.data.models.colors.ColorType
 import com.serhij.mashi.data.models.mashup.MashupTrait
-import com.serhij.mashi.data.models.traits.TraitDetails
 import com.serhij.mashi.data.models.traits.TraitType
 import kotlinx.coroutines.CoroutineScope
 

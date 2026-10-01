@@ -20,5 +20,5 @@ sealed class ActionsIntent {
 
     object OnPreviewDismiss : ActionsIntent()
 
-    object OnGenerate: ActionsIntent()
+    object OnGenerate : ActionsIntent()
 }

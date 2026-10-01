@@ -27,7 +27,7 @@ class AndroidImageSharer(private val context: Context) : ImageSharer {
         val chooser = Intent.createChooser(intent, title).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        
+
         context.startActivity(chooser)
     }
 }

@@ -6,11 +6,11 @@ import kotlinx.serialization.Serializable
 sealed class MainRoutes {
 
     @Serializable
-    data object History: MainRoutes()
+    data object History : MainRoutes()
 
     @Serializable
-    data object Mashup: MainRoutes()
+    data object Mashup : MainRoutes()
 
     @Serializable
-    data object Settings: MainRoutes()
+    data object Settings : MainRoutes()
 }

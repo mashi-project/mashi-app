@@ -7,7 +7,6 @@ import com.serhij.mashi.app.supabase.Supabase.supabase
 import com.serhij.mashi.data.repos.DatastoreRepo
 import com.serhij.mashi.data.repos.HistoryRepo
 import io.github.jan.supabase.auth.auth
-import io.ktor.util.Platform
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO

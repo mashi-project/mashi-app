@@ -82,7 +82,8 @@ fun Settings() {
             Button(
                 modifier = Modifier.fillMaxWidth(0.8F),
                 onClick = {
-                    wallet?.let { w -> viewModel.deleteHistoryByWallet(w) } }
+                    wallet?.let { w -> viewModel.deleteHistoryByWallet(w) }
+                }
             ) {
                 Text("Clear history")
             }

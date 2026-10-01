@@ -14,7 +14,6 @@ import platform.Photos.PHAssetChangeRequest
 import platform.Photos.PHPhotoLibrary
 import platform.UIKit.UIImage
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class IosImageGallerySaver : ImageGallerySaver {
 

@@ -69,7 +69,7 @@ fun SearchBar(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
                     modifier = Modifier.size(24.dp),
-                    tint = Color.Black
+                    tint = Color.White
                 )
             }
         } else {
@@ -87,7 +87,7 @@ fun SearchBar(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
                     modifier = Modifier.size(24.dp),
-                    tint = Color.Black
+                    tint = Color.White
                 )
             }
 

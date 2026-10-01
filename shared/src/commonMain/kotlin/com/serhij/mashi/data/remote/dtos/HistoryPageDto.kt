@@ -1,6 +1,5 @@
 package com.serhij.mashi.data.remote.dtos
 
-import com.serhij.mashi.data.models.image.ImageType
 import kotlinx.serialization.Serializable
 
 @Serializable

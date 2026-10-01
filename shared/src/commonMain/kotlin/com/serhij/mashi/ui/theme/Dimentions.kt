@@ -3,7 +3,6 @@ package com.serhij.mashi.ui.theme
 import androidx.compose.ui.unit.dp
 
 
-
 // Components
 val ContentContainerHeight = 36.dp
 val SmallIconSize = 24.dp

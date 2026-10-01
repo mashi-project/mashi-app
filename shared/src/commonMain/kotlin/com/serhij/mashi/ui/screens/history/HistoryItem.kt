@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil3.ImageLoader
-import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
@@ -86,6 +85,7 @@ fun HistoryItem(
                                 LoadingIndicator()
                             }
                         }
+
                         else -> {
                             SubcomposeAsyncImageContent()
                         }
