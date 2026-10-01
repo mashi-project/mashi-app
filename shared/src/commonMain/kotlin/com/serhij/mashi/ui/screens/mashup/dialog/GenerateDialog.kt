@@ -71,11 +71,17 @@ fun GenerateDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Button(onClick = { onGenerate.invoke(checked, ImageType.PNG) }) {
+                Button(onClick = {
+                    onGenerate.invoke(checked, ImageType.PNG)
+                    onDismiss.invoke()
+                }) {
                     Text("Save and generate PNG")
                 }
 
-                Button(onClick = { onGenerate.invoke(checked, ImageType.GIF) }) {
+                Button(onClick = {
+                    onGenerate.invoke(checked, ImageType.GIF)
+                    onDismiss.invoke()
+                }) {
                     Text("Save and generate GIF")
                 }
 
