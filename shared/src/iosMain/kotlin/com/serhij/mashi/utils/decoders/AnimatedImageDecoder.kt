@@ -4,7 +4,6 @@ package com.serhij.mashi.utils.decoders
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import coil3.Canvas
 import coil3.Image
@@ -39,11 +38,6 @@ import kotlin.time.TimeSource
 import org.jetbrains.skia.Image as SkiaImage
 
 internal actual fun getAnimatedDecoderFactory(): Decoder.Factory? = AnimatedImageDecoder.Factory()
-
-/** Set to true while the list scrolls; animations freeze on their current frame. */
-actual object AnimationGate {
-    actual var paused by mutableStateOf(false)
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 private val decodeDispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(2)
