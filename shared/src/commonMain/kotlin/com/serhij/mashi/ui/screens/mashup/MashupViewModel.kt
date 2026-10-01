@@ -8,11 +8,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.serhij.mashi.data.local.db.entities.ImageTypeEntity
 import com.serhij.mashi.data.models.colors.ColorType
+import com.serhij.mashi.data.models.colors.SelectedColors
 import com.serhij.mashi.data.models.image.ImageType
+import com.serhij.mashi.data.models.mashi.Mashi
 import com.serhij.mashi.data.models.mashi.mappers.fromEntities
 import com.serhij.mashi.data.models.mashup.MashupDetails
 import com.serhij.mashi.data.models.mashup.MashupTrait
 import com.serhij.mashi.data.models.traits.SortType
+import com.serhij.mashi.data.models.traits.TraitDetails
 import com.serhij.mashi.data.models.traits.TraitType
 import com.serhij.mashi.data.remote.MashiApi
 import com.serhij.mashi.data.remote.dtos.SaveMashupRes
@@ -65,6 +68,32 @@ class MashupViewModel(
     init {
         observeWallet()
         observeCollection()
+    }
+
+    fun loadForLurker() {
+        val traits = listOf(
+            TraitDetails(
+                type = TraitType.BACKGROUND,
+                url = "https://katzemon.com/api/mashi/app/preview/1"
+            )
+        )
+
+        mashupState.value = mashupState.value.copy(
+            mashupDetails = MashupDetails(
+                assets = traits,
+                colors = SelectedColors(),
+                name = "Preview"
+            ),
+            colors = SelectedColors(),
+            nfts = listOf(
+                Mashi(
+                    name = "Preview",
+                    author = "Preview",
+                    compositeUrl = "",
+                    traits = traits
+                )
+            )
+        )
     }
 
     private fun observeWallet() {

@@ -21,7 +21,8 @@ import com.serhij.mashi.ui.theme.SmallPadding
 @Composable
 fun ActionsPanel(
     modifier: Modifier = Modifier,
-    processActionsIntent: (ActionsIntent) -> Unit
+    processActionsIntent: (ActionsIntent) -> Unit,
+    isLurking: Boolean = false
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -32,31 +33,32 @@ fun ActionsPanel(
         ) {
             ColorSelectActionButton(onColor = { processActionsIntent(ActionsIntent.OnColor) })
 
-            ActionButton(
-                icon = Icons.Default.Delete,
-                onClick = { processActionsIntent(ActionsIntent.OnReset) },
-            )
+            if (!isLurking) {
+                ActionButton(
+                    icon = Icons.Default.Delete,
+                    onClick = { processActionsIntent(ActionsIntent.OnReset) },
+                )
 
-            ActionButton(
-                icon = Icons.Default.Refresh,
-                onClick = { processActionsIntent(ActionsIntent.OnRandom) }
-            )
+                ActionButton(
+                    icon = Icons.Default.Refresh,
+                    onClick = { processActionsIntent(ActionsIntent.OnRandom) }
+                )
 
-            ActionButton(
-                icon = Icons.AutoMirrored.Filled.Undo,
-                onClick = { processActionsIntent(ActionsIntent.OnUndo) },
-            )
+                ActionButton(
+                    icon = Icons.AutoMirrored.Filled.Undo,
+                    onClick = { processActionsIntent(ActionsIntent.OnUndo) },
+                )
 
-            ActionButton(
-                icon = Icons.AutoMirrored.Filled.Redo,
-                onClick = { processActionsIntent(ActionsIntent.OnRedo) }
-            )
+                ActionButton(
+                    icon = Icons.AutoMirrored.Filled.Redo,
+                    onClick = { processActionsIntent(ActionsIntent.OnRedo) }
+                )
 
-
-            ActionButton(
-                icon = Icons.Default.Download,
-                onClick = { processActionsIntent(ActionsIntent.OnGenerate) },
-            )
+                ActionButton(
+                    icon = Icons.Default.Download,
+                    onClick = { processActionsIntent(ActionsIntent.OnGenerate) },
+                )
+            }
         }
     }
 }

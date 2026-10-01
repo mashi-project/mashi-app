@@ -20,6 +20,7 @@ import com.serhij.mashi.data.states.image.ImageIntent
 import com.serhij.mashi.data.states.mashup.ActionsIntent
 import com.serhij.mashi.ui.screens.buttons.SaveActionButton
 import com.serhij.mashi.ui.screens.mashup.composite.MashupComposite
+import com.serhij.mashi.ui.screens.mashup.preview.composite.PreviewComposite
 import com.serhij.mashi.ui.theme.SmallPadding
 import com.serhij.mashi.ui.theme.Surface
 import com.serhij.mashi.ui.theme.TraitShape
@@ -30,7 +31,8 @@ fun MashupActions(
     modifier: Modifier = Modifier,
     holderWidth: Dp,
     processImageIntent: (ImageIntent) -> Unit,
-    processActionsIntent: (ActionsIntent) -> Unit
+    processActionsIntent: (ActionsIntent) -> Unit,
+    isLurking: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -48,29 +50,39 @@ fun MashupActions(
                     .clip(TraitShape)
                     .background(Surface),
             ) {
-                MashupComposite(
-                    modifier = modifier,
-                    colors = mashupDetails.colors,
-                    assets = mashupDetails.assets,
-                    holderWidth = holderWidth,
-                    processImageIntent = processImageIntent
-                )
+                if (!isLurking) {
+                    MashupComposite(
+                        modifier = modifier,
+                        colors = mashupDetails.colors,
+                        assets = mashupDetails.assets,
+                        holderWidth = holderWidth,
+                        processImageIntent = processImageIntent
+                    )
+                } else {
+                    PreviewComposite(
+                        modifier = Modifier,
+                        assets = mashupDetails.assets,
+                        holderWidth = holderWidth
+                    )
+                }
             }
 
             Spacer(Modifier.width(SmallPadding))
 
-            Row(
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .width(holderWidth + (40 * 2).dp + SmallPadding * 2),
-                horizontalArrangement = Arrangement.End
-            ) {
-                SaveActionButton(onSave = { processActionsIntent(ActionsIntent.OnSave) })
+            if (!isLurking) {
+                Row(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .width(holderWidth + (40 * 2).dp + SmallPadding * 2),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    SaveActionButton(onSave = { processActionsIntent(ActionsIntent.OnSave) })
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(SmallPadding))
 
-        ActionsPanel(processActionsIntent = processActionsIntent)
+        ActionsPanel(processActionsIntent = processActionsIntent, isLurking = isLurking)
     }
 }

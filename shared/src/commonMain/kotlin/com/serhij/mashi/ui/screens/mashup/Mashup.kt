@@ -46,6 +46,7 @@ import com.serhij.mashi.ui.indicators.SyncIndicator
 import com.serhij.mashi.ui.screens.mashup.actions.MashupActions
 import com.serhij.mashi.ui.screens.mashup.categories.CategorySelector
 import com.serhij.mashi.ui.screens.mashup.categories.CollectiblesCategory
+import com.serhij.mashi.ui.screens.mashup.categories.LurkingPreview
 import com.serhij.mashi.ui.screens.mashup.color.ColorSheet
 import com.serhij.mashi.ui.screens.mashup.dialog.GenerateDialog
 import com.serhij.mashi.ui.screens.mashup.preview.MashupPreview
@@ -64,6 +65,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +74,10 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
     val isLoading by remember { viewModel.isLoading }
     val isGenerate by remember { viewModel.isGenerateDialog }
     val isDiscord by viewModel.isDiscord.collectAsState(false)
+
+    if (isLurking) {
+        viewModel.loadForLurker()
+    }
 
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
@@ -100,7 +106,7 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                 if (scrolling) {
                     AnimationGate.paused = true
                 } else {
-                    delay(120) // avoids flicker between fling segments
+                    delay(120.milliseconds) // avoids flicker between fling segments
                     AnimationGate.paused = false
                 }
             }
@@ -219,7 +225,8 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                             },
                             processActionsIntent = {
                                 viewModel.processActionsIntent(it)
-                            }
+                            },
+                            isLurking = isLurking
                         )
                     }
 
@@ -247,7 +254,16 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                                     NotFound(modifier = Modifier.fillMaxSize())
                                 }
                             } else {
-                                if (mashupUiState.isCollectibles) {
+                                if (isLurking) {
+                                    LurkingPreview(
+                                        modifier = Modifier.weight(1F),
+                                        nft = sortedNfts[0],
+                                        mashupDetails = mashupState.mashupDetails,
+                                        processMashupIntent = {
+                                            viewModel.processMashupIntent(it)
+                                        },
+                                    )
+                                } else if (mashupUiState.isCollectibles) {
                                     CollectiblesCategory(
                                         modifier = Modifier.weight(1f),
                                         nfts = sortedNfts,
@@ -280,28 +296,30 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                                 }
                             }
 
-                            Row(
-                                modifier = Modifier.padding(vertical = SmallPadding),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Sorting { type ->
-                                    viewModel.changeSortType(
+                            if (!isLurking) {
+                                Row(
+                                    modifier = Modifier.padding(vertical = SmallPadding),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Sorting { type ->
+                                        viewModel.changeSortType(
+                                            scope = scope,
+                                            vState = collectiblesVState,
+                                            gState = traitsGridState,
+                                            type = type,
+                                        )
+                                    }
+
+                                    CategorySelector(
+                                        mashupState = mashupState,
+                                        mashupUiState = mashupUiState,
+                                        processMashupIntent = {
+                                            viewModel.processMashupIntent(it)
+                                        },
+                                        gridState = traitsGridState,
                                         scope = scope,
-                                        vState = collectiblesVState,
-                                        gState = traitsGridState,
-                                        type = type,
                                     )
                                 }
-
-                                CategorySelector(
-                                    mashupState = mashupState,
-                                    mashupUiState = mashupUiState,
-                                    processMashupIntent = {
-                                        viewModel.processMashupIntent(it)
-                                    },
-                                    gridState = traitsGridState,
-                                    scope = scope,
-                                )
                             }
                         } else {
                             Box(
