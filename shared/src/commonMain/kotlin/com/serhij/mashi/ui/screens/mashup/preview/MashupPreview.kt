@@ -58,21 +58,6 @@ fun MashupPreview(
         }.toMutableStateList()
     }
 
-    val selectTrait = { trait: TraitDetails ->
-        val index = optionalTraits.indexOfFirst { it.trait == trait } ?: -1
-        if (index != -1) {
-            val item = optionalTraits[index]
-            if (item.trait.type != TraitType.BACKGROUND) {
-                optionalTraits[index] = item.copy(selected = !item.selected)
-            }
-        }
-    }
-
-    val isSelected = { trait: TraitDetails ->
-        val sameTypeTrait = mashupDetails.assets.find { it.type == trait.type }
-        sameTypeTrait?.url == trait.url
-    }
-
     BoxWithConstraints {
         val screenType = maxWidth.detectScreenType()
 
@@ -142,7 +127,7 @@ fun MashupPreview(
                     spacedByHoriz = MediumPadding,
                     columns = screenType.columns,
                     processImageIntent = processImageIntent,
-                    onClick = { traitDetails -> selectTrait.invoke(traitDetails) }
+                    onClick = {  }
                 )
             }
         }
