@@ -56,6 +56,9 @@ class SettingsViewModel(
     }
 
     fun disconnectDiscord(scope: CoroutineScope) {
-        scope.launch { supabase.auth.clearSession() }
+        scope.launch {
+            datastoreRepo.removeWallet()
+            supabase.auth.clearSession()
+        }
     }
 }
