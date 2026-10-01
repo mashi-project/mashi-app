@@ -21,7 +21,5 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
-    <key>CFBundleDisplayName</key>
-    <string>Mashi's</string>
 </dict>
 </plist>
