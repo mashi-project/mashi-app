@@ -95,7 +95,7 @@ class MashupViewModel(
                         )
                         collectionRepo.cacheMashup(wallet = wallet, mashupDetails = syncedMashup)
 
-                        collectionRepo.updateOwnedData("0xac73aca1205aff5dfc5e31223c33a970854057ae")
+                        collectionRepo.updateOwnedData(wallet)
                     } catch (e: Exception) {
                         print(e.message)
                     } finally {

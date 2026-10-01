@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -41,6 +40,7 @@ import com.serhij.mashi.data.models.colors.ColorType
 import com.serhij.mashi.data.models.image.ImageType
 import com.serhij.mashi.data.models.traits.TraitType
 import com.serhij.mashi.data.states.mashup.ActionsIntent
+import com.serhij.mashi.ui.availability.NotFound
 import com.serhij.mashi.ui.grid.MashupTraitHolderGrid
 import com.serhij.mashi.ui.indicators.SyncIndicator
 import com.serhij.mashi.ui.screens.mashup.actions.MashupActions
@@ -50,7 +50,6 @@ import com.serhij.mashi.ui.screens.mashup.color.ColorSheet
 import com.serhij.mashi.ui.screens.mashup.dialog.GenerateDialog
 import com.serhij.mashi.ui.screens.mashup.preview.MashupPreview
 import com.serhij.mashi.ui.screens.mashup.sorting.Sorting
-import com.serhij.mashi.ui.theme.ContentAccentColor
 import com.serhij.mashi.ui.theme.MediumPadding
 import com.serhij.mashi.ui.theme.Padding
 import com.serhij.mashi.ui.theme.SmallPadding
@@ -245,10 +244,7 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                                         .fillMaxWidth(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(
-                                        text = "Loading collectibles...",
-                                        color = ContentAccentColor
-                                    )
+                                    NotFound(modifier = Modifier.fillMaxSize())
                                 }
                             } else {
                                 if (mashupUiState.isCollectibles) {
@@ -309,15 +305,10 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                             }
                         } else {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f),
+                                modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "Preparing collection...",
-                                    color = ContentAccentColor
-                                )
+                                LoadingIndicator()
                             }
                         }
                     }

@@ -22,11 +22,6 @@ class CollectionRepo(
             val newCollection = alchemyRepo.getCollection(wallet)
             println("Fetched new collection size: ${newCollection.size}")
 
-            if (newCollection.isEmpty()) {
-                println("New collection from Alchemy is empty. Skipping update.")
-                return false
-            }
-
             val oldCollection = nftRepo.ownedNftsFlow.first()
 
             if (oldCollection.isEmpty()) {
