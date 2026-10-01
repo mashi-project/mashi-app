@@ -10,18 +10,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import coil3.ImageLoader
-import coil3.compose.setSingletonImageLoaderFactory
-import coil3.memory.MemoryCache
-import coil3.request.crossfade
-import coil3.util.DebugLogger
 import com.mmk.kmpnotifier.KMPNotifier
 import com.mmk.kmpnotifier.push.PushListener
 import com.mmk.kmpnotifier.push.firebase.addPushListener
 import com.serhij.mashi.app.supabase.Supabase.supabase
 import com.serhij.mashi.ui.screens.Main
 import com.serhij.mashi.ui.screens.auth.Auth
-import com.serhij.mashi.utils.decoders.getAnimatedDecoderFactory
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.serialization.json.jsonPrimitive
@@ -31,23 +25,13 @@ import org.koin.compose.viewmodel.koinViewModel
 @Preview
 fun App() {
     val viewModel = koinViewModel<AppViewModel>()
-    val wallet by viewModel.walletFlow.collectAsState(null)
+    val wallet by viewModel.walletFlow.collectAsState("")
 
     var discordId by remember { mutableStateOf<String?>(null) }
+    var isLurking by remember { mutableStateOf(false) }
 
-    setSingletonImageLoaderFactory { context ->
-        ImageLoader.Builder(context)
-            .components {
-                getAnimatedDecoderFactory()?.let { add(it) }
-            }
-            .memoryCache {
-                MemoryCache.Builder()
-                    .maxSizePercent(context, percent = 0.25) // Use 25% of app memory
-                    .build()
-            }
-            .crossfade(true)
-            .logger(DebugLogger())
-            .build()
+    val onIsLurkingChange = {
+        isLurking = !isLurking
     }
 
     LaunchedEffect(Unit) {
@@ -86,10 +70,12 @@ fun App() {
 
     MaterialTheme {
         Column {
-            if (wallet != null && discordId != null) {
+            if (isLurking) {
+                Main(isLurking = true)
+            } else if (wallet.length == 42) {
                 Main(isLurking = false)
             } else {
-                Auth()
+                Auth(onIsLurkingChange = onIsLurkingChange)
             }
         }
     }

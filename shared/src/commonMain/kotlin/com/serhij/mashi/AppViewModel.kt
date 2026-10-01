@@ -14,7 +14,6 @@ class AppViewModel(
     private val datastoreRepo: DatastoreRepo,
     private val mashiApi: MashiApi
 ) : ViewModel() {
-
     val walletFlow = datastoreRepo.walletFlow
 
     fun setWalletById(id: String) {

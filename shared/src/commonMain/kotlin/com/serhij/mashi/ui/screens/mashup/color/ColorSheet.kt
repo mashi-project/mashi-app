@@ -102,6 +102,24 @@ fun ColorSheet(
         )
     }
 
+    // Saturation derived from the picker thumb position
+    val currentSaturation = {
+        if (pickerSize.width > 0) {
+            (pickerLocation.x / pickerSize.width).coerceIn(0f, 1f)
+        } else {
+            0f
+        }
+    }
+
+    // Brightness (value) derived from the picker thumb position
+    val currentBrightness = {
+        if (pickerSize.height > 0) {
+            (1f - pickerLocation.y / pickerSize.height).coerceIn(0f, 1f)
+        } else {
+            0f
+        }
+    }
+
     LaunchedEffect(
         color,
         selectedColorType,
@@ -114,13 +132,17 @@ fun ColorSheet(
         ) {
             val hsv = ColorPickerHelper.colorToHsv(color)
 
-            rangeColor = ColorPickerHelper.hsvToColor(
-                hue = hsv[0],
-                saturation = 1f,
-                value = 1f,
-            )
+            // Hue is undefined for black/white/gray, so keep the slider
+            // where it is instead of snapping it back to 0
+            if (hsv[1] > 0f && hsv[2] > 0f) {
+                rangeColor = ColorPickerHelper.hsvToColor(
+                    hue = hsv[0],
+                    saturation = 1f,
+                    value = 1f,
+                )
 
-            hueProgress = hsv[0] / 360f
+                hueProgress = hsv[0] / 360f
+            }
 
             pickerLocation = Offset(
                 x = hsv[1] * pickerSize.width,
@@ -193,37 +215,11 @@ fun ColorSheet(
                         isDragging = dragging
 
                         if (!dragging) {
-                            val saturation =
-                                if (pickerSize.width > 0) {
-                                    (
-                                            pickerLocation.x /
-                                                    pickerSize.width
-                                            ).coerceIn(0f, 1f)
-                                } else {
-                                    0f
-                                }
-
-                            val brightness =
-                                if (pickerSize.height > 0) {
-                                    (
-                                            1f -
-                                                    pickerLocation.y /
-                                                    pickerSize.height
-                                            ).coerceIn(0f, 1f)
-                                } else {
-                                    0f
-                                }
-
-                            val finalColor =
+                            changeColor(
                                 ColorPickerHelper.hsvToColor(
                                     hue = hueProgress * 360f,
-                                    saturation = saturation,
-                                    value = brightness,
-                                )
-
-                            processMashupIntent(
-                                MashupIntent.OnColorChange(
-                                    finalColor
+                                    saturation = currentSaturation(),
+                                    value = currentBrightness(),
                                 )
                             )
                         }
@@ -245,12 +241,20 @@ fun ColorSheet(
                     onProgressChange = { progress ->
                         hueProgress = progress
 
-                        rangeColor =
+                        rangeColor = ColorPickerHelper.hsvToColor(
+                            hue = progress * 360f,
+                            saturation = 1f,
+                            value = 1f,
+                        )
+
+                        // This was missing: push the new color to the state
+                        changeColor(
                             ColorPickerHelper.hsvToColor(
                                 hue = progress * 360f,
-                                saturation = 1f,
-                                value = 1f,
+                                saturation = currentSaturation(),
+                                value = currentBrightness(),
                             )
+                        )
                     }
                 )
 

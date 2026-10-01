@@ -92,7 +92,8 @@ class MashupViewModel(
                     compositeUrl = "",
                     traits = traits
                 )
-            )
+            ),
+            wallet = "empty"
         )
     }
 

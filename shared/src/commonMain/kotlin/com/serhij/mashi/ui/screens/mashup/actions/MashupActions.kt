@@ -81,8 +81,10 @@ fun MashupActions(
             }
         }
 
-        Spacer(modifier = Modifier.height(SmallPadding))
+        if (!isLurking) {
+            Spacer(modifier = Modifier.height(SmallPadding))
 
-        ActionsPanel(processActionsIntent = processActionsIntent, isLurking = isLurking)
+            ActionsPanel(processActionsIntent = processActionsIntent)
+        }
     }
 }
