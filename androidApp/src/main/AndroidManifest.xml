@@ -4,14 +4,14 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:name=".app.MashiApp"
+        android:name="com.mashiverse.mashit.app.MashiApp"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.mashiverse.mashit.MainActivity"
             android:exported="true"
             android:launchMode="singleTask">
 
@@ -24,12 +24,13 @@
             <!-- Deep Link Filter for Discord OAuth Redirect -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="mashi"
-                    android:host="discord-callback" />
+                    android:host="discord-callback"
+                    android:scheme="mashi" />
             </intent-filter>
         </activity>
 

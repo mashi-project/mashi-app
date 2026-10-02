@@ -44,7 +44,7 @@ kotlin {
     }
 
     android {
-        namespace = "com.serhij.mashi.shared"
+        namespace = "com.mashiverse.mashit.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -142,7 +142,7 @@ kotlin {
 }
 
 buildkonfig {
-    packageName = "com.serhij.mashi"
+    packageName = "com.mashiverse.mashit"
     objectName = "Keys"
 
     defaultConfigs {

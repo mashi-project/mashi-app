@@ -24,14 +24,14 @@ dependencies {
 }
 
 android {
-    namespace = "com.serhij.mashi"
+    namespace = "com.mashiverse.mashit"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.serhij.mashi"
+        applicationId = "com.mashiverse.mashit"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 2
+        versionCode = 51
         versionName = "1.0"
     }
     packaging {

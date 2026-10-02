@@ -1,5 +1,0 @@
-package com.serhij.mashi.data.local
-
-import android.content.Context
-
-actual class DbContext(val androidContext: Context)

@@ -25,8 +25,8 @@
 -keepclassmembers class <2>$<3> {
     kotlinx.serialization.KSerializer serializer(...);
 }
--keep,includedescriptorclasses class com.serhij.mashi.**$$serializer { *; }
--keepclassmembers class com.serhij.mashi.** {
+-keep,includedescriptorclasses class com.mashiverse.mashit.**$$serializer { *; }
+-keepclassmembers class com.mashiverse.mashit.** {
     *** Companion;
 }
 
@@ -78,7 +78,7 @@
 -dontwarn coil3.PlatformContext
 
 # ---------- BuildKonfig ----------
--keep class com.serhij.mashi.Keys { *; }
+-keep class com.mashiverse.mashit.Keys { *; }
 
 # ---------- Optional: strip logs in release ----------
 -assumenosideeffects class android.util.Log {
