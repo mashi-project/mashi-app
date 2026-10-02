@@ -23,4 +23,10 @@ class AppViewModel(
             datastoreRepo.updateWallet(wallet)
         }
     }
+
+    fun setWalletForApprovalTeam() {
+        viewModelScope.launch(Dispatchers.IO) {
+            datastoreRepo.updateWallet("0x000000000000000000000000000000000000dEaD")
+        }
+    }
 }

@@ -156,6 +156,11 @@ buildkonfig {
             "ALCHEMY_API_KEY",
             getSecret("ALCHEMY_API_KEY")
         )
+        buildConfigField(
+            com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING,
+            "APPROVAL_TEAM_CODE",
+            getSecret("APPROVAL_TEAM_CODE")
+        )
     }
 }
 

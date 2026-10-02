@@ -46,10 +46,8 @@ import com.mashiverse.mashit.ui.indicators.SyncIndicator
 import com.mashiverse.mashit.ui.screens.mashup.actions.MashupActions
 import com.mashiverse.mashit.ui.screens.mashup.categories.CategorySelector
 import com.mashiverse.mashit.ui.screens.mashup.categories.CollectiblesCategory
-import com.mashiverse.mashit.ui.screens.mashup.categories.LurkingPreview
 import com.mashiverse.mashit.ui.screens.mashup.color.ColorSheet
 import com.mashiverse.mashit.ui.screens.mashup.dialog.GenerateDialog
-import com.mashiverse.mashit.ui.screens.mashup.preview.MashupPreview
 import com.mashiverse.mashit.ui.screens.mashup.sorting.Sorting
 import com.mashiverse.mashit.ui.theme.MediumPadding
 import com.mashiverse.mashit.ui.theme.Padding
@@ -69,14 +67,14 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Mashup(searchQuery: String, isLurking: Boolean) {
+fun Mashup(searchQuery: String, isApprovalTeam: Boolean = false) {
     val viewModel = koinViewModel<MashupViewModel>()
     val isLoading by remember { viewModel.isLoading }
     val isGenerate by remember { viewModel.isGenerateDialog }
     val isDiscord by viewModel.isDiscord.collectAsState(false)
 
-    if (isLurking) {
-        viewModel.loadForLurker()
+    if (isApprovalTeam) {
+        viewModel.loadForApprovalTeam()
     }
 
     val scope = rememberCoroutineScope()
@@ -225,8 +223,7 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                             },
                             processActionsIntent = {
                                 viewModel.processActionsIntent(it)
-                            },
-                            isLurking = isLurking
+                            }
                         )
                     }
 
@@ -254,16 +251,7 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                                     NotFound(modifier = Modifier.fillMaxSize())
                                 }
                             } else {
-                                if (isLurking) {
-                                    LurkingPreview(
-                                        modifier = Modifier.weight(1F),
-                                        nft = sortedNfts[0],
-                                        mashupDetails = mashupState.mashupDetails,
-                                        processMashupIntent = {
-                                            viewModel.processMashupIntent(it)
-                                        },
-                                    )
-                                } else if (mashupUiState.isCollectibles) {
+                                if (mashupUiState.isCollectibles) {
                                     CollectiblesCategory(
                                         modifier = Modifier.weight(1f),
                                         nfts = sortedNfts,
@@ -296,37 +284,28 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                                 }
                             }
 
-                            if (!isLurking) {
-                                Row(
-                                    modifier = Modifier.padding(vertical = SmallPadding),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Sorting { type ->
-                                        viewModel.changeSortType(
-                                            scope = scope,
-                                            vState = collectiblesVState,
-                                            gState = traitsGridState,
-                                            type = type,
-                                        )
-                                    }
-
-                                    CategorySelector(
-                                        mashupState = mashupState,
-                                        mashupUiState = mashupUiState,
-                                        processMashupIntent = {
-                                            viewModel.processMashupIntent(it)
-                                        },
-                                        gridState = traitsGridState,
+                            Row(
+                                modifier = Modifier.padding(vertical = SmallPadding),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Sorting { type ->
+                                    viewModel.changeSortType(
                                         scope = scope,
+                                        vState = collectiblesVState,
+                                        gState = traitsGridState,
+                                        type = type,
                                     )
                                 }
-                            }
-                        } else {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                LoadingIndicator()
+
+                                CategorySelector(
+                                    mashupState = mashupState,
+                                    mashupUiState = mashupUiState,
+                                    processMashupIntent = {
+                                        viewModel.processMashupIntent(it)
+                                    },
+                                    gridState = traitsGridState,
+                                    scope = scope,
+                                )
                             }
                         }
                     }
@@ -347,22 +326,6 @@ fun Mashup(searchQuery: String, isLurking: Boolean) {
                     },
                     processActionsIntent = {
                         viewModel.processActionsIntent(it)
-                    },
-                    height = height,
-                )
-            }
-
-            if (mashupUiState.isPreview) {
-                MashupPreview(
-                    closeBottomSheet = {
-                        viewModel.processActionsIntent(
-                            ActionsIntent.OnPreviewDismiss
-                        )
-                    },
-                    sheetState = previewState,
-                    mashupDetails = mashupDetailsWithColors,
-                    processImageIntent = {
-                        viewModel.processImageIntent(it)
                     },
                     height = height,
                 )

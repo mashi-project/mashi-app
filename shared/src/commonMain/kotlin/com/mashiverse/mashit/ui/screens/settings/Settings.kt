@@ -24,10 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mashiverse.mashit.ui.availability.Lurking
 import com.mashiverse.mashit.ui.screens.background.CollageBackground
 import com.mashiverse.mashit.ui.theme.ContentAccentColor
 import mashi.shared.generated.resources.Res
@@ -44,7 +42,7 @@ import org.jetbrains.compose.resources.imageResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun Settings(isLurking: Boolean) {
+fun Settings() {
     val scope = rememberCoroutineScope()
     val viewModel = koinViewModel<SettingsViewModel>()
     val wallet by remember {
@@ -81,65 +79,55 @@ fun Settings(isLurking: Boolean) {
                 )
         )
 
-        if (!isLurking) {
-            Column(
-                modifier = Modifier.align(Alignment.Center)
-                    .widthIn(max = 480.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+        Column(
+            modifier = Modifier.align(Alignment.Center)
+                .widthIn(max = 480.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            Spacer(modifier = Modifier.weight(1.7F))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(0.8F),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-
-                Spacer(modifier = Modifier.weight(1.7F))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(0.8F),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        modifier = Modifier.size(24.dp),
-                        checked = checked,
-                        colors = CheckboxDefaults.colors().copy(
-                            checkedBorderColor = Color.White,
-                            uncheckedBorderColor = Color.White,
-                            checkedCheckmarkColor = Color.White,
-                        ),
-                        onCheckedChange = { viewModel.updateDiscord(!checked) }
-                    )
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    Text("Share on Discord", fontSize = 10.sp, color = ContentAccentColor)
-                }
-
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    modifier = Modifier.fillMaxWidth(0.8F),
-                    onClick = {
-                        wallet?.let { w -> viewModel.deleteHistoryByWallet(w) }
-                    }
-                ) {
-                    Text("Clear history")
-                }
-
-                Spacer(modifier = Modifier.weight(1F))
-
-                DisconnectButton(
-                    modifier = Modifier.fillMaxWidth(0.8F),
-                    onClick = { viewModel.disconnectDiscord(scope) }
+                Checkbox(
+                    modifier = Modifier.size(24.dp),
+                    checked = checked,
+                    colors = CheckboxDefaults.colors().copy(
+                        checkedBorderColor = Color.White,
+                        uncheckedBorderColor = Color.White,
+                        checkedCheckmarkColor = Color.White,
+                    ),
+                    onCheckedChange = { viewModel.updateDiscord(!checked) }
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text("Share on Discord", fontSize = 10.sp, color = ContentAccentColor)
             }
-        } else {
-            Lurking(modifier = Modifier.fillMaxSize())
+
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                modifier = Modifier.fillMaxWidth(0.8F),
+                onClick = {
+                    wallet?.let { w -> viewModel.deleteHistoryByWallet(w) }
+                }
+            ) {
+                Text("Clear history")
+            }
+
+            Spacer(modifier = Modifier.weight(1F))
+
+            DisconnectButton(
+                modifier = Modifier.fillMaxWidth(0.8F),
+                onClick = { viewModel.disconnectDiscord(scope) }
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
-}
-
-@Preview
-@Composable
-private fun SettingsPreview() {
-    Settings(isLurking = false)
 }

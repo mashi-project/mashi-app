@@ -6,16 +6,16 @@ import com.mashiverse.mashit.ui.screens.history.History
 import com.mashiverse.mashit.ui.screens.mashup.Mashup
 import com.mashiverse.mashit.ui.screens.settings.Settings
 
-fun NavGraphBuilder.mainGraph(searchQueryProvider: () -> String, isLurking: Boolean) {
+fun NavGraphBuilder.mainGraph(searchQueryProvider: () -> String, isApprovalTeam: Boolean = false) {
     composable<MainRoutes.Mashup> {
-        Mashup(searchQuery = searchQueryProvider(), isLurking = isLurking)
+        Mashup(searchQuery = searchQueryProvider(), isApprovalTeam)
     }
 
     composable<MainRoutes.History> {
-        History(isLurking = isLurking)
+        History()
     }
 
     composable<MainRoutes.Settings> {
-        Settings(isLurking = isLurking)
+        Settings()
     }
 }

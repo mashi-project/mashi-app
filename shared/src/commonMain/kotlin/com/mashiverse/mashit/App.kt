@@ -10,12 +10,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import com.mmk.kmpnotifier.KMPNotifier
-import com.mmk.kmpnotifier.push.PushListener
-import com.mmk.kmpnotifier.push.firebase.addPushListener
 import com.mashiverse.mashit.app.supabase.Supabase.supabase
 import com.mashiverse.mashit.ui.screens.Main
 import com.mashiverse.mashit.ui.screens.auth.Auth
+import com.mmk.kmpnotifier.KMPNotifier
+import com.mmk.kmpnotifier.push.PushListener
+import com.mmk.kmpnotifier.push.firebase.addPushListener
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.serialization.json.jsonPrimitive
@@ -28,10 +28,14 @@ fun App() {
     val wallet by viewModel.walletFlow.collectAsState("")
 
     var discordId by remember { mutableStateOf<String?>(null) }
-    var isLurking by remember { mutableStateOf(false) }
+    var isApprovalTeam by remember { mutableStateOf(false) }
 
-    val onIsLurkingChange = {
-        isLurking = !isLurking
+    val onIsApprovalTeamChange = { isApprovalTeam = !isApprovalTeam }
+
+    LaunchedEffect(isApprovalTeam) {
+        if (isApprovalTeam) {
+            viewModel.setWalletForApprovalTeam()
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -70,12 +74,10 @@ fun App() {
 
     MaterialTheme {
         Column {
-            if (isLurking) {
-                Main(isLurking = true)
-            } else if (wallet.length == 42) {
-                Main(isLurking = false)
+            if (wallet.length == 42) {
+                Main(isApprovalTeam = isApprovalTeam)
             } else {
-                Auth(onIsLurkingChange = onIsLurkingChange)
+                Auth(onIsApprovalTeamChange = onIsApprovalTeamChange)
             }
         }
     }

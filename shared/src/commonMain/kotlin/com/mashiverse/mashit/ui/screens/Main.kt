@@ -22,7 +22,7 @@ import com.mashiverse.mashit.ui.nav.BottomNav
 import com.mashiverse.mashit.ui.theme.Background
 
 @Composable
-fun Main(isLurking: Boolean) {
+fun Main(isApprovalTeam: Boolean) {
     val navController = rememberNavController()
     var searchQ by remember { mutableStateOf("") }
 
@@ -38,13 +38,13 @@ fun Main(isLurking: Boolean) {
                     // Pop up to the start destination of the graph to
                     // avoid building up a massive back stack
                     popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
+                        saveState = isApprovalTeam
                     }
                     // Avoid multiple copies of the same destination when
                     // reselecting the same bottom bar tab
-                    launchSingleTop = true
+                    launchSingleTop = isApprovalTeam
                     // Restore state when reselecting a previously selected tab
-                    restoreState = true
+                    restoreState = isApprovalTeam
                 }
             }
         }
@@ -62,7 +62,10 @@ fun Main(isLurking: Boolean) {
             exitTransition = { fadeOut() },
             enterTransition = { fadeIn() }
         ) {
-            mainGraph(isLurking = isLurking, searchQueryProvider = { searchQ })
+            mainGraph(
+                searchQueryProvider = { searchQ },
+                isApprovalTeam = isApprovalTeam
+            )
         }
     }
 }

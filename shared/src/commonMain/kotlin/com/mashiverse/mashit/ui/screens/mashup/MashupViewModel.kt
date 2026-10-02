@@ -10,12 +10,10 @@ import com.mashiverse.mashit.data.local.db.entities.ImageTypeEntity
 import com.mashiverse.mashit.data.models.colors.ColorType
 import com.mashiverse.mashit.data.models.colors.SelectedColors
 import com.mashiverse.mashit.data.models.image.ImageType
-import com.mashiverse.mashit.data.models.mashi.Mashi
 import com.mashiverse.mashit.data.models.mashi.mappers.fromEntities
 import com.mashiverse.mashit.data.models.mashup.MashupDetails
 import com.mashiverse.mashit.data.models.mashup.MashupTrait
 import com.mashiverse.mashit.data.models.traits.SortType
-import com.mashiverse.mashit.data.models.traits.TraitDetails
 import com.mashiverse.mashit.data.models.traits.TraitType
 import com.mashiverse.mashit.data.remote.MashiApi
 import com.mashiverse.mashit.data.remote.dtos.SaveMashupRes
@@ -50,6 +48,7 @@ class MashupViewModel(
     val isLoading = mutableStateOf(false)
     val isGenerateDialog = mutableStateOf(false)
     val isDiscord = datastoreRepo.discordFlow
+    val isApprovalTeam = mutableStateOf(false)
 
     var mashupUiState = mutableStateOf(MashupUiState())
         private set
@@ -70,31 +69,8 @@ class MashupViewModel(
         observeCollection()
     }
 
-    fun loadForLurker() {
-        val traits = listOf(
-            TraitDetails(
-                type = TraitType.BACKGROUND,
-                url = "https://katzemon.com/api/mashi/app/preview/1"
-            )
-        )
-
-        mashupState.value = mashupState.value.copy(
-            mashupDetails = MashupDetails(
-                assets = traits,
-                colors = SelectedColors(),
-                name = "Preview"
-            ),
-            colors = SelectedColors(),
-            nfts = listOf(
-                Mashi(
-                    name = "Preview",
-                    author = "Preview",
-                    compositeUrl = "",
-                    traits = traits
-                )
-            ),
-            wallet = "empty"
-        )
+    fun loadForApprovalTeam() {
+        isApprovalTeam.value = true
     }
 
     private fun observeWallet() {
@@ -104,8 +80,7 @@ class MashupViewModel(
                     withContext(Dispatchers.Main) {
                         mashupState.value = mashupState.value.copy(wallet = wallet)
                     }
-                    val initialMashup =
-                        collectionRepo.getCachedMashup(wallet) ?: MashupDetails()
+                    val initialMashup = collectionRepo.getCachedMashup(wallet) ?: MashupDetails()
 
                     withContext(Dispatchers.Main) {
                         mashupState.value = mashupState.value.copy(

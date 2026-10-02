@@ -9,24 +9,35 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mashiverse.mashit.ui.screens.background.CollageBackground
+import com.mashiverse.mashit.utils.config.RemoteConfig
 import mashi.shared.generated.resources.Res
 import mashi.shared.generated.resources.collage1
 import mashi.shared.generated.resources.collage2
@@ -43,10 +54,11 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun Auth(onIsLurkingChange: () -> Unit) {
+fun Auth(onIsApprovalTeamChange: () -> Unit) {
     val scope = rememberCoroutineScope()
     val viewModel = koinViewModel<AuthViewModel>()
     val uriHandler = LocalUriHandler.current
+    var code by remember { mutableStateOf("******") }
 
     val collageImages = remember {
         listOf(
@@ -58,6 +70,12 @@ fun Auth(onIsLurkingChange: () -> Unit) {
 
     val collageBitmaps = collageImages.map { res ->
         imageResource(res)
+    }
+
+    LaunchedEffect(code) {
+        if (code == RemoteConfig.APPROVAL_TEAM_CODE) {
+            onIsApprovalTeamChange.invoke()
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -115,17 +133,25 @@ fun Auth(onIsLurkingChange: () -> Unit) {
                 TextButton(onClick = { uriHandler.openUri("https://discord.gg/hDTMDCf4ha") }) {
                     Text("Connect wallet before auth", color = Color.White)
                 }
-
-                TextButton(onClick = onIsLurkingChange) {
-                    Text(text = "Or start lurking", color = Color.White)
-                }
             }
         }
-    }
-}
 
-@Preview
-@Composable
-fun AuthPreview() {
-    Auth(onIsLurkingChange = {})
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(32.dp)
+        ) {
+            Text("Code: ", color = Color.White)
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            BasicTextField(
+                value = code,
+                onValueChange = { code = it },
+                textStyle = TextStyle(color = Color.White),
+                singleLine = true,
+                cursorBrush = SolidColor(Color.White),
+            )
+        }
+    }
 }
