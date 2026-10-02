@@ -34,7 +34,7 @@ fun ColorSheetActions(
         Button(
             modifier = Modifier
                 .weight(1F)
-                .height(32.dp),
+                .height(40.dp),
             onClick = {
                 scope.launch { sheetState.hide() }.invokeOnCompletion {
                     if (!sheetState.isVisible) {
@@ -59,7 +59,7 @@ fun ColorSheetActions(
         Button(
             modifier = Modifier
                 .weight(1F)
-                .height(32.dp),
+                .height(40.dp),
             onClick = {
                 scope.launch { sheetState.hide() }.invokeOnCompletion {
                     if (!sheetState.isVisible) {

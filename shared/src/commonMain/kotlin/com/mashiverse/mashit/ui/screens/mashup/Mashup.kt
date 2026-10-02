@@ -48,6 +48,7 @@ import com.mashiverse.mashit.ui.screens.mashup.categories.CategorySelector
 import com.mashiverse.mashit.ui.screens.mashup.categories.CollectiblesCategory
 import com.mashiverse.mashit.ui.screens.mashup.color.ColorSheet
 import com.mashiverse.mashit.ui.screens.mashup.dialog.GenerateDialog
+import com.mashiverse.mashit.ui.screens.mashup.preview.MashupPreview
 import com.mashiverse.mashit.ui.screens.mashup.sorting.Sorting
 import com.mashiverse.mashit.ui.theme.MediumPadding
 import com.mashiverse.mashit.ui.theme.Padding
@@ -237,7 +238,7 @@ fun Mashup(searchQuery: String, isApprovalTeam: Boolean = false) {
                             .onSizeChanged { size ->
                                 height = with(density) {
                                     size.height.toDp()
-                                } + 64.dp
+                                } + 80.dp
                             },
                     ) {
                         if (mashupUiState.isCollectionReady) {
@@ -326,6 +327,22 @@ fun Mashup(searchQuery: String, isApprovalTeam: Boolean = false) {
                     },
                     processActionsIntent = {
                         viewModel.processActionsIntent(it)
+                    },
+                    height = height,
+                )
+            }
+
+            if (mashupUiState.isPreview) {
+                MashupPreview(
+                    closeBottomSheet = {
+                        viewModel.processActionsIntent(
+                            ActionsIntent.OnPreviewDismiss
+                        )
+                    },
+                    sheetState = previewState,
+                    mashupDetails = mashupDetailsWithColors,
+                    processImageIntent = {
+                        viewModel.processImageIntent(it)
                     },
                     height = height,
                 )

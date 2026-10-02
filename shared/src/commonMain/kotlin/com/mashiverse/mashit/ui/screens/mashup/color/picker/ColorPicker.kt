@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,10 +25,13 @@ import com.mashiverse.mashit.ui.theme.Padding
 import com.mashiverse.mashit.utils.helpers.ColorPickerHelper
 import com.mashiverse.mashit.utils.helpers.drawColorSelector
 
+/**
+ * Stateless picker: the parent's [pickerLocation] is the single source of truth
+ * for where the selector is drawn.
+ */
 @Composable
 fun ColorPicker(
     modifier: Modifier = Modifier,
-    color: Color,
     rangeColor: Color,
     pickerLocation: Offset,
     onPickedColor: (Color) -> Unit,
@@ -37,33 +39,16 @@ fun ColorPicker(
     onDraggingChange: (Boolean) -> Unit,
     onPickerSizeChange: (IntSize) -> Unit,
 ) {
-    var internalLocation by remember { mutableStateOf(pickerLocation) }
-    var isDragging by remember { mutableStateOf(false) }
     var pickerSize by remember { mutableStateOf(IntSize(1, 1)) }
 
-    LaunchedEffect(
-        color,
-        pickerSize,
-    ) {
-        if (
-            !isDragging &&
-            pickerSize.width > 1 &&
-            pickerSize.height > 1
-        ) {
-            val hsv = ColorPickerHelper.colorToHsv(color)
-
-            internalLocation = Offset(
-                x = hsv[1] * pickerSize.width,
-                y = (1f - hsv[2]) * pickerSize.height,
-            )
-        }
-    }
-
-    LaunchedEffect(pickerLocation) {
-        if (!isDragging) {
-            internalLocation = pickerLocation
-        }
-    }
+    // Live color under the selector (follows the thumb while dragging)
+    val selectorColor = ColorPickerHelper.hsvToColor(
+        hue = ColorPickerHelper.colorToHsv(rangeColor)[0],
+        saturation = (pickerLocation.x / pickerSize.width.coerceAtLeast(1))
+            .coerceIn(0f, 1f),
+        value = (1f - pickerLocation.y / pickerSize.height.coerceAtLeast(1))
+            .coerceIn(0f, 1f),
+    )
 
     Box(
         modifier = modifier,
@@ -105,11 +90,9 @@ fun ColorPicker(
                     awaitEachGesture {
                         val down = awaitFirstDown()
 
-                        isDragging = true
                         onDraggingChange(true)
 
                         val updatePosition: (Offset) -> Unit = { position ->
-
                             val constrained = Offset(
                                 x = position.x.coerceIn(
                                     0f,
@@ -121,38 +104,22 @@ fun ColorPicker(
                                 ),
                             )
 
-                            internalLocation = constrained
-
-                            onPickerLocationChange(
-                                constrained
-                            )
+                            onPickerLocationChange(constrained)
 
                             val saturation =
-                                (
-                                        constrained.x /
-                                                pickerSize.width
-                                        ).coerceIn(0f, 1f)
+                                (constrained.x / pickerSize.width).coerceIn(0f, 1f)
 
                             val brightness =
-                                (
-                                        1f -
-                                                constrained.y /
-                                                pickerSize.height
-                                        ).coerceIn(0f, 1f)
+                                (1f - constrained.y / pickerSize.height).coerceIn(0f, 1f)
 
-                            /*
-                             * This is only the temporary color.
-                             * The parent decides when to commit it.
-                             */
-                            val previewColor =
+                            // Temporary color only; the parent decides when to commit it
+                            onPickedColor(
                                 ColorPickerHelper.hsvToColor(
-                                    hue = ColorPickerHelper
-                                        .colorToHsv(rangeColor)[0],
+                                    hue = ColorPickerHelper.colorToHsv(rangeColor)[0],
                                     saturation = saturation,
                                     value = brightness,
                                 )
-
-                            onPickedColor(previewColor)
+                            )
                         }
 
                         updatePosition(down.position)
@@ -162,7 +129,6 @@ fun ColorPicker(
                             change.consume()
                         }
 
-                        isDragging = false
                         onDraggingChange(false)
                     }
                 }
@@ -172,8 +138,8 @@ fun ColorPicker(
             modifier = Modifier.fillMaxSize(),
         ) {
             drawColorSelector(
-                color = color,
-                location = internalLocation,
+                color = selectorColor,
+                location = pickerLocation,
             )
         }
     }
