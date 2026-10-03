@@ -103,21 +103,13 @@ fun Auth(onIsApprovalTeamChange: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Column {
-                    Text(
-                        text = "Mashi's:",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-
-                    Text(
-                        text = "tiny world in your paws",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
+                Text(
+                    modifier = Modifier.padding(top = 24.dp),
+                    text = "tiny world in your paws",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
 
                 Image(
                     modifier = Modifier.size(72.dp),
