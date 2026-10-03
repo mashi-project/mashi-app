@@ -130,7 +130,11 @@ fun Auth(onIsApprovalTeamChange: () -> Unit) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TextButton(onClick = { uriHandler.openUri("https://discord.gg/hDTMDCf4ha") }) {
-                    Text("Connect wallet before auth", color = Color.White)
+                    Text(
+                        "Click here if your wallet isn't connected to Discord",
+                        color = Color.White,
+                        fontSize = 10.sp
+                    )
                 }
             }
         }
