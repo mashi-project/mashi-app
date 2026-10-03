@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.mashiverse.mashit.data.models.image.ImageType
 import com.mashiverse.mashit.ui.theme.ContentAccentColor
+import com.mashiverse.mashit.ui.theme.Secondary
 
 @Composable
 fun GenerateDialog(
@@ -43,7 +44,7 @@ fun GenerateDialog(
                 .fillMaxWidth()
                 .padding(16.dp),
             colors = CardDefaults.cardColors().copy(
-                containerColor = Color.DarkGray,
+                containerColor = Secondary,
                 contentColor = ContentAccentColor
             )
         ) {

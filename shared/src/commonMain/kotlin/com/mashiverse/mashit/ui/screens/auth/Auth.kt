@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -104,13 +103,21 @@ fun Auth(onIsApprovalTeamChange: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(
-                    text = "Your pocket friend",
-                    fontSize = 20.sp,
-                    fontStyle = FontStyle.Italic,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                Column {
+                    Text(
+                        text = "Mashi's:",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+
+                    Text(
+                        text = "tiny world in your paws",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
 
                 Image(
                     modifier = Modifier.size(72.dp),
@@ -118,6 +125,7 @@ fun Auth(onIsApprovalTeamChange: () -> Unit) {
                     contentDescription = null
                 )
             }
+
 
             DiscordAuthButton(
                 modifier = Modifier.fillMaxWidth(0.8F),
@@ -131,9 +139,10 @@ fun Auth(onIsApprovalTeamChange: () -> Unit) {
 
                 TextButton(onClick = { uriHandler.openUri("https://discord.gg/hDTMDCf4ha") }) {
                     Text(
-                        "Click here if your wallet isn't connected to Discord",
+                        "If you can't sign in, click here to join our Discord\n" +
+                                "Where you have to connect the wallet",
                         color = Color.White,
-                        fontSize = 10.sp
+                        fontSize = 12.sp
                     )
                 }
             }

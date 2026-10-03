@@ -20,7 +20,7 @@ class CollectionRepo(
     suspend fun updateOwnedData(wallet: String): Boolean {
         return try {
             val newCollection = alchemyRepo.getCollection(wallet)
-            println("Fetched new collection size: ${newCollection.size}")
+            if (newCollection.isEmpty()) { return true }
 
             val oldCollection = nftRepo.ownedNftsFlow.first()
 
