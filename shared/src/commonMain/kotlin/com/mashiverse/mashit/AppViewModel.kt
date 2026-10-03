@@ -19,7 +19,7 @@ class AppViewModel(
     fun setWalletById(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val wallet = mashiApi.getWallet(id.toLong())
-            KMPNotifier.firebasePushNotifier.subscribeToTopic(wallet)
+            KMPNotifier.firebasePushNotifier.subscribeToTopic(wallet.lowercase())
             datastoreRepo.updateWallet(wallet)
         }
     }
