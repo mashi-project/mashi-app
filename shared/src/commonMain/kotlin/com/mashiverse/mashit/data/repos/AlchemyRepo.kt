@@ -14,6 +14,13 @@ import com.mashiverse.mashit.utils.helpers.parseName
 import com.mashiverse.mashit.utils.helpers.toFilebaseUri
 import com.mashiverse.mashit.utils.helpers.toIpfsPartialUri
 
+/**
+ * Safe replacement for TraitType.valueOf(): returns null for labels that are
+ * not a trait (e.g. "composite") or are unknown, instead of throwing.
+ */
+private fun String.toTraitTypeOrNull(): TraitType? =
+    TraitType.values().firstOrNull { it.name.equals(this.trim(), ignoreCase = true) }
+
 class AlchemyRepo(
     private val alchemyApi: AlchemyApi,
     private val ipfsApi: IpfsApi
@@ -37,67 +44,83 @@ class AlchemyRepo(
                 if (ownedNfts.isEmpty()) break
 
                 for (nft in ownedNfts) {
-                    val metadata = nft.raw?.metadata
-                    var details = NftDetails("", "", -1)
-                    var compositeUrl = ""
-                    var traits: List<TraitDetails> = emptyList()
+                    // One broken NFT must not wipe out the whole collection
+                    try {
+                        val metadata = nft.raw?.metadata
+                        var details = NftDetails("", "", -1)
+                        var compositeUrl = ""
+                        var traits: List<TraitDetails> = emptyList()
+                        var needsFallback =
+                            metadata?.image == null || metadata.assets == null || metadata.name == null
 
-                    val tokenUri = nft.tokenUri.toFilebaseUri().toIpfsPartialUri()
+                        val tokenUri = nft.tokenUri.toFilebaseUri().toIpfsPartialUri()
 
-                    // Populate initial values from Alchemy metadata if available
-                    metadata?.image?.let {
-                        compositeUrl = it.fromIpfsScheme()
-                    }
-                    metadata?.assets?.let {
-                        traits = it.toTraits()
-                    }
-                    metadata?.name?.let {
-                        details = parseName(it)
-                    }
-
-                    if (metadata?.image == null || metadata?.assets == null || metadata?.name == null) {
-                        try {
-                            val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
-                            compositeUrl = ipfsMetadata.image.fromIpfsScheme()
-                            traits = ipfsMetadata.assets.map { asset ->
-                                TraitDetails(
-                                    url = asset.uri.fromIpfsScheme(),
-                                    type = TraitType.valueOf(asset.label.uppercase())
-                                )
+                        // Populate initial values from Alchemy metadata if available
+                        metadata?.image?.let {
+                            compositeUrl = it.fromIpfsScheme()
+                        }
+                        metadata?.assets?.let {
+                            try {
+                                traits = it.toTraits()
+                            } catch (e: Exception) {
+                                // e.g. unknown/"composite" label -> use the IPFS fallback instead
+                                println("Alchemy traits parse error: ${e.message}")
+                                traits = emptyList()
+                                needsFallback = true
                             }
-                            details = parseName(ipfsMetadata.name)
-                        } catch (e: Exception) {
-                            println("IPFS Fallback Error: ${e.message}")
                         }
-                    }
-
-                    if (details.mint == -1 && tokenUri.isNotEmpty()) {
-                        try {
-                            val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
-                            details = parseName(ipfsMetadata.name)
-                        } catch (e: Exception) {
-                            println("Mint Parse Error: ${e.message}")
+                        metadata?.name?.let {
+                            details = parseName(it)
                         }
-                    }
 
-                    val currentOwned = Owned(
-                        mint = details.mint,
-                        timestamp = nft.timeLastUpdated ?: ""
-                    )
+                        if (needsFallback) {
+                            try {
+                                val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
+                                compositeUrl = ipfsMetadata.image.fromIpfsScheme()
+                                traits = ipfsMetadata.assets.mapNotNull { asset ->
+                                    // Skips "composite" and any unknown label instead of crashing
+                                    val type = asset.label.toTraitTypeOrNull()
+                                        ?: return@mapNotNull null
+                                    TraitDetails(
+                                        url = asset.uri.fromIpfsScheme(),
+                                        type = type
+                                    )
+                                }
+                                details = parseName(ipfsMetadata.name)
+                            } catch (e: Exception) {
+                                println("IPFS Fallback Error: ${e.message}")
+                            }
+                        }
 
-                    if (nftMap.containsKey(details.name)) {
-                        val existingNft = nftMap[details.name]!!
-                        val updatedOwned = (existingNft.owned ?: emptyList()) + currentOwned
+                        if (details.mint == -1 && tokenUri.isNotEmpty()) {
+                            try {
+                                val ipfsMetadata = ipfsApi.getMetadataByIpfsUri(tokenUri)
+                                details = parseName(ipfsMetadata.name)
+                            } catch (e: Exception) {
+                                println("Mint Parse Error: ${e.message}")
+                            }
+                        }
 
-                        nftMap[details.name] = existingNft.copy(owned = updatedOwned)
-                    } else {
-                        nftMap[details.name] = Mashi(
-                            name = details.name,
-                            compositeUrl = compositeUrl,
-                            traits = traits,
-                            author = details.authorName,
-                            owned = listOf(currentOwned)
+                        val currentOwned = Owned(
+                            mint = details.mint,
+                            timestamp = nft.timeLastUpdated ?: ""
                         )
+
+                        val existingNft = nftMap[details.name]
+                        if (existingNft != null) {
+                            val updatedOwned = (existingNft.owned ?: emptyList()) + currentOwned
+                            nftMap[details.name] = existingNft.copy(owned = updatedOwned)
+                        } else {
+                            nftMap[details.name] = Mashi(
+                                name = details.name,
+                                compositeUrl = compositeUrl,
+                                traits = traits,
+                                author = details.authorName,
+                                owned = listOf(currentOwned)
+                            )
+                        }
+                    } catch (e: Exception) {
+                        println("Skipping NFT: ${e.message}")
                     }
                 }
 
