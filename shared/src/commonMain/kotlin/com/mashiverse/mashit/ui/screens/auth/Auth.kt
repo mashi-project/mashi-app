@@ -114,7 +114,7 @@ fun Auth(onIsApprovalTeamChange: () -> Unit) {
                 )
 
                 Image(
-                    modifier = Modifier.size(72.dp)
+                    modifier = Modifier.height(72.dp)
                         .offset(y = (-2).dp),
                     painter = painterResource(Res.drawable.katze),
                     contentDescription = null

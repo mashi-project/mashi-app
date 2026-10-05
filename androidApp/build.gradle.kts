@@ -11,6 +11,7 @@ kotlin {
         jvmTarget = JvmTarget.JVM_11
     }
 }
+
 dependencies {
     implementation(project(":shared"))
 
@@ -31,28 +32,46 @@ android {
         applicationId = "com.mashiverse.mashit"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 64
-        versionName = "2.1.3"
+        versionCode = 65
+        versionName = "2.1.4"
     }
+
+    // Only package the languages you actually ship (adjust the list)
+    androidResources {
+        localeFilters += listOf("en")
+    }
+
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += setOf(
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "/META-INF/*.version",
+                "/META-INF/DEPENDENCIES",
+                "/META-INF/LICENSE*",
+                "/META-INF/NOTICE*",
+                "/kotlin-tooling-metadata.json",
+                "DebugProbesKt.bin"
+            )
         }
     }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            // If AGP warns that this file is deprecated, switch to "proguard-android.txt"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         compose = true
     }

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		C5E776F4306D6AD2003D3FF0 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C5E776F3306D6AD2003D3FF0 /* FirebaseCore */; };
 		C5F02DA1306AD4FD001B1AFC /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = C5F02DA0306AD4FD001B1AFC /* SDWebImage */; };
-		C5F02DA3306AD4FD001B1AFC /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = C5F02DA2306AD4FD001B1AFC /* SDWebImageMapKit */; };
 		C5F02DA6306AD510001B1AFC /* SDWebImageSVGCoder in Frameworks */ = {isa = PBXBuildFile; productRef = C5F02DA5306AD510001B1AFC /* SDWebImageSVGCoder */; };
 		E26E9385B7AE0B51306CDC83 /* KotlinMultiplatformLinkedPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 87D6D7AE3E197E78495B66DF /* KotlinMultiplatformLinkedPackage */; };
 /* End PBXBuildFile section */
@@ -50,7 +49,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5F02DA6306AD510001B1AFC /* SDWebImageSVGCoder in Frameworks */,
-				C5F02DA3306AD4FD001B1AFC /* SDWebImageMapKit in Frameworks */,
 				C5E776F4306D6AD2003D3FF0 /* FirebaseCore in Frameworks */,
 				C5F02DA1306AD4FD001B1AFC /* SDWebImage in Frameworks */,
 				E26E9385B7AE0B51306CDC83 /* KotlinMultiplatformLinkedPackage in Frameworks */,
@@ -99,7 +97,6 @@
 			name = iosApp;
 			packageProductDependencies = (
 				C5F02DA0306AD4FD001B1AFC /* SDWebImage */,
-				C5F02DA2306AD4FD001B1AFC /* SDWebImageMapKit */,
 				C5F02DA5306AD510001B1AFC /* SDWebImageSVGCoder */,
 				C5E776F3306D6AD2003D3FF0 /* FirebaseCore */,
 				87D6D7AE3E197E78495B66DF /* KotlinMultiplatformLinkedPackage */,
@@ -199,7 +196,7 @@
 				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 4833U57JDQ;
 				ENABLE_PREVIEWS = YES;
@@ -214,11 +211,12 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
+				LD_GENERATE_MAP_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.3;
+				MARKETING_VERSION = 2.1.4;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -368,7 +366,7 @@
 				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 4833U57JDQ;
 				ENABLE_PREVIEWS = YES;
@@ -383,11 +381,12 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
+				LD_GENERATE_MAP_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.3;
+				MARKETING_VERSION = 2.1.4;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -470,11 +469,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C5F02D9F306AD4FD001B1AFC /* XCRemoteSwiftPackageReference "SDWebImage" */;
 			productName = SDWebImage;
-		};
-		C5F02DA2306AD4FD001B1AFC /* SDWebImageMapKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C5F02D9F306AD4FD001B1AFC /* XCRemoteSwiftPackageReference "SDWebImage" */;
-			productName = SDWebImageMapKit;
 		};
 		C5F02DA5306AD510001B1AFC /* SDWebImageSVGCoder */ = {
 			isa = XCSwiftPackageProductDependency;

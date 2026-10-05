@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         // Initialize KMPNotifier BEFORE anything accesses FirebasePush
         KMPNotifier.initialize(
             NotificationPlatformConfiguration.Android(
-                notificationIconResId = R.drawable.katze
+                notificationIconResId = R.drawable.icon
             ),
             FirebasePush
         )

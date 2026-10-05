@@ -37,6 +37,7 @@ kotlin {
             linkerOpts("-lsqlite3")
             linkerOpts.add("-Wl,-dead_strip")
             linkerOpts.add("-Wl,-dead_strip_dylibs")
+            binaryOption("smallBinary", "true")
             export(libs.kmpnotifier.push.firebase)
             export(libs.kmpnotifier.core)
         }
@@ -94,9 +95,7 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 
             // Supabase (Exposed via 'api' so Android app target can access it)
-            api(libs.postgrest.kt)
             api(libs.auth.kt)
-            api(libs.realtime.kt)
 
             // KTOR
             implementation(libs.ktor.client.core)
@@ -121,9 +120,6 @@ kotlin {
             // Datastore
             implementation(libs.androidx.datastore.core)
             implementation(libs.androidx.datastore.preferences.core)
-
-            // Paging
-            implementation(libs.androidx.paging.compose)
 
             // Notifications
             api(libs.kmpnotifier.push.firebase)
