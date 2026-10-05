@@ -4,15 +4,11 @@ android-compileSdk = "37"
 android-minSdk = "31"
 android-targetSdk = "37"
 androidx-activity = "1.13.0"
-androidx-appcompat = "1.8.0"
-androidx-core = "1.19.1"
-androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.11.0"
 authKt = "3.8.0"
 coilCompose = "3.6.3"
 composeMultiplatform = "1.12.1"
 datastoreCore = "1.2.1"
-junit = "4.13.2"
 kmpnotifierPushFirebase = "2.0.1"
 koinCore = "4.2.2"
 kotlin = "2.4.20"
@@ -23,15 +19,13 @@ navigationCompose = "2.10.0-beta01"
 pagingCompose = "3.5.1"
 room3 = "3.1.0-alpha01"
 sqlite = "2.7.1"
-ksp = "2.3.5"
+ksp = "2.3.12"
 google-services = "4.5.0"
 
 [libraries]
 androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastoreCore" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastoreCore" }
-androidx-paging-common-ktx = { module = "androidx.paging:paging-common-ktx", version.ref = "pagingCompose" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingCompose" }
-androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "pagingCompose" }
 auth-kt = { module = "io.github.jan-tennert.supabase:auth-kt", version.ref = "authKt" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coilCompose" }

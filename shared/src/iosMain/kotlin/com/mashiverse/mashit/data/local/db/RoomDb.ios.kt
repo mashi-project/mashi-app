@@ -1,7 +1,7 @@
 package com.mashiverse.mashit.data.local.db
 
 import androidx.room3.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.driver.NativeSQLiteDriver
 import com.mashiverse.mashit.data.local.DbContext
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
@@ -23,7 +23,7 @@ actual fun createDb(context: DbContext): RoomDb {
     return Room.databaseBuilder<RoomDb>(
         name = dbPath
     )
-        .setDriver(BundledSQLiteDriver())
+        .setDriver(NativeSQLiteDriver())
         .fallbackToDestructiveMigration(true)
         .build()
 }

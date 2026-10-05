@@ -19,8 +19,6 @@ val keysProperties = Properties().apply {
     }
 }
 
-
-
 // Helper getter with fallback to environment variables (useful for CI/CD)
 fun getSecret(key: String): String {
     return keysProperties.getProperty(key)
@@ -36,8 +34,9 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
-            optimized = true
-            linkerOpts.add("-dead_strip")
+            linkerOpts("-lsqlite3")
+            linkerOpts.add("-Wl,-dead_strip")
+            linkerOpts.add("-Wl,-dead_strip_dylibs")
             export(libs.kmpnotifier.push.firebase)
             export(libs.kmpnotifier.core)
         }
