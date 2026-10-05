@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -101,21 +102,25 @@ fun Auth(onIsApprovalTeamChange: () -> Unit) {
             Row(
                 modifier = Modifier.fillMaxWidth(0.8F),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
+                Spacer(modifier = Modifier.weight(1F))
+
                 Text(
                     modifier = Modifier.padding(top = 24.dp),
-                    text = "tiny world in your paws",
+                    text = "Tiny world in your paws",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
 
                 Image(
-                    modifier = Modifier.size(72.dp),
+                    modifier = Modifier.size(72.dp)
+                        .offset(y = (-2).dp),
                     painter = painterResource(Res.drawable.katze),
                     contentDescription = null
                 )
+
+                Spacer(modifier = Modifier.weight(1F))
             }
 
 

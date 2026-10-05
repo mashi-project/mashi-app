@@ -31,8 +31,8 @@ android {
         applicationId = "com.mashiverse.mashit"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 60
-        versionName = "2.0.9"
+        versionCode = 61
+        versionName = "2.1"
     }
     packaging {
         resources {
