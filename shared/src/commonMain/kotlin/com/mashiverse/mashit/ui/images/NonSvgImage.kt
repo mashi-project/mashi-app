@@ -10,15 +10,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import coil3.util.DebugLogger
-import com.mashiverse.mashit.utils.decoders.getAnimatedDecoderFactory
 
 @Composable
 fun NonSvgImage(
@@ -26,11 +24,10 @@ fun NonSvgImage(
     data: String,
     contentScale: ContentScale
 ) {
+
     val ctx = LocalPlatformContext.current
     val staticLoader = remember(ctx) {
-        ImageLoader.Builder(ctx).components {
-            add(getAnimatedDecoderFactory()!!)
-        }.logger(DebugLogger()).build()
+        SingletonImageLoader.get(context = ctx)
     }
 
     val request = remember(data) {

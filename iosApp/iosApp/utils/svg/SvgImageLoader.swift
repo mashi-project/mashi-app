@@ -5,12 +5,36 @@ import Shared
 import UIKit
 
 final class SvgImageLoader: NSObject, SvgLoader {
-
+    
     private static let workQueue = DispatchQueue(
         label: "com.mashit.svgRecolorLoader",
         qos: .userInitiated,
         attributes: .concurrent
     )
+
+    // MARK: - SDWebImage Cache
+
+    private let imageCache: SDImageCache
+
+    override init() {
+        let config = SDImageCacheConfig()
+        
+        // 32 MB memory cache
+        config.maxMemoryCost = 32 * 1024 * 1024
+        
+        // 32 MB disk cache
+        config.maxDiskSize = 32 * 1024 * 1024
+
+        self.imageCache = SDImageCache(
+            namespace: "svg_cache",
+            diskCacheDirectory: nil,
+            config: config
+        )
+
+        super.init()
+    }
+
+    // MARK: - Original SVG
 
     func fetchOriginalSvgData(
         url: String,
@@ -22,7 +46,9 @@ final class SvgImageLoader: NSObject, SvgLoader {
                     let error = NSError(
                         domain: "SvgImageLoader",
                         code: 400,
-                        userInfo: [NSLocalizedDescriptionKey: "Invalid URL string: \(url)"]
+                        userInfo: [
+                            NSLocalizedDescriptionKey: "Invalid URL string: \(url)"
+                        ]
                     )
                     completionHandler(nil, error)
                     return
@@ -30,9 +56,10 @@ final class SvgImageLoader: NSObject, SvgLoader {
 
                 let cacheKey = SDWebImageManager.shared.cacheKey(for: nsUrl)
 
+                // Check disk cache
                 let cachedData: Data? = await withCheckedContinuation { continuation in
                     SvgImageLoader.workQueue.async {
-                        let data = SDImageCache.shared.diskImageData(forKey: cacheKey)
+                        let data = self.imageCache.diskImageData(forKey: cacheKey)
                         continuation.resume(returning: (data?.isEmpty == false) ? data : nil)
                     }
                 }
@@ -42,18 +69,23 @@ final class SvgImageLoader: NSObject, SvgLoader {
                     return
                 }
 
+                // Download
                 let (fetchedData, _) = try await URLSession.shared.data(from: nsUrl)
 
+                // Store on disk
                 SvgImageLoader.workQueue.async {
-                    SDImageCache.shared.storeImageData(toDisk: fetchedData, forKey: cacheKey)
+                    self.imageCache.storeImageData(toDisk: fetchedData, forKey: cacheKey)
                 }
 
                 completionHandler(fetchedData.toKotlinByteArray(), nil)
+
             } catch {
                 completionHandler(nil, error)
             }
         }
     }
+
+    // MARK: - SVG Processing
 
     func loadImageAsync(
         svgData: KotlinByteArray,
@@ -70,6 +102,7 @@ final class SvgImageLoader: NSObject, SvgLoader {
                 }
 
                 let sanitized = SvgSanitizer.sanitize(rawString)
+
                 let colors = selectedColors ?? SelectedColors(
                     base: "#00FF00",
                     eyes: "#FFFF00",
@@ -84,12 +117,15 @@ final class SvgImageLoader: NSObject, SvgLoader {
                 )
 
                 let svgText = recolored.contains("<svg") ? recolored : sanitized
+
                 if svgText != recolored {
                     print("⚠️ Invalid recolored SVG, falling back to sanitized original")
                 }
 
-                guard let finalData = svgText.data(using: .utf8),
-                      let vectorImage = SDImageSVGCoder.shared.decodedImage(with: finalData, options: nil) else {
+                guard
+                    let finalData = svgText.data(using: .utf8),
+                    let vectorImage = SDImageSVGCoder.shared.decodedImage(with: finalData, options: nil)
+                else {
                     print("❌ SVG vector decode failed")
                     return nil
                 }
@@ -127,6 +163,7 @@ final class SvgImageLoader: NSObject, SvgLoader {
 extension Data {
     func toKotlinByteArray() -> KotlinByteArray {
         let byteArray = KotlinByteArray(size: Int32(self.count))
+
         self.withUnsafeBytes { bufferPointer in
             if let address = bufferPointer.baseAddress {
                 let bytes = address.assumingMemoryBound(to: Int8.self)
@@ -135,6 +172,7 @@ extension Data {
                 }
             }
         }
+
         return byteArray
     }
 }
@@ -142,6 +180,7 @@ extension Data {
 extension KotlinByteArray {
     func toData() -> Data {
         var data = Data(count: Int(self.size))
+
         data.withUnsafeMutableBytes { bufferPointer in
             if let address = bufferPointer.baseAddress {
                 let bytes = address.assumingMemoryBound(to: Int8.self)
@@ -150,6 +189,7 @@ extension KotlinByteArray {
                 }
             }
         }
+
         return data
     }
 }

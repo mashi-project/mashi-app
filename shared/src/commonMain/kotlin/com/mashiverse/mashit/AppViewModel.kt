@@ -15,6 +15,7 @@ class AppViewModel(
     private val mashiApi: MashiApi
 ) : ViewModel() {
     val walletFlow = datastoreRepo.walletFlow
+    val cacheFlow = datastoreRepo.cacheFlow
 
     fun setWalletById(id: String) {
         viewModelScope.launch(Dispatchers.IO) {

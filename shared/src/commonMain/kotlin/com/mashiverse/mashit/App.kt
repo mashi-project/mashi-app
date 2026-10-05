@@ -1,7 +1,6 @@
 package com.mashiverse.mashit
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -10,16 +9,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
+import coil3.util.DebugLogger
 import com.mashiverse.mashit.app.supabase.Supabase.supabase
 import com.mashiverse.mashit.ui.screens.Main
 import com.mashiverse.mashit.ui.screens.auth.Auth
 import com.mashiverse.mashit.ui.theme.MashiTheme
+import com.mashiverse.mashit.utils.decoders.getAnimatedDecoderFactory
 import com.mmk.kmpnotifier.KMPNotifier
 import com.mmk.kmpnotifier.push.PushListener
 import com.mmk.kmpnotifier.push.firebase.addPushListener
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.serialization.json.jsonPrimitive
+import okio.FileSystem
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -27,11 +33,26 @@ import org.koin.compose.viewmodel.koinViewModel
 fun App() {
     val viewModel = koinViewModel<AppViewModel>()
     val wallet by viewModel.walletFlow.collectAsState("")
+    val cacheSize by viewModel.cacheFlow.collectAsState(0)
 
     var discordId by remember { mutableStateOf<String?>(null) }
     var isApprovalTeam by remember { mutableStateOf(false) }
 
     val onIsApprovalTeamChange = { isApprovalTeam = !isApprovalTeam }
+
+    if (cacheSize != 0) {
+        setSingletonImageLoaderFactory { context ->
+            ImageLoader.Builder(context).components { add(getAnimatedDecoderFactory()!!) }
+                .memoryCache { MemoryCache.Builder().maxSizePercent(context, 0.20).build() }
+                .diskCache {
+                    DiskCache.Builder()
+                        .directory(FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "mashi_cache")
+                        .maxSizeBytes(cacheSize.toLong() * 1024 * 1024).build()
+                }
+                .logger(DebugLogger())
+                .build()
+        }
+    }
 
     LaunchedEffect(isApprovalTeam) {
         if (isApprovalTeam) {

@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import coil3.ImageLoader
 import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.svg.SvgDecoder
@@ -23,12 +24,17 @@ class SvgImageLoader(
     private val diskCache: DiskCache by lazy {
         DiskCache.Builder()
             .directory(context.cacheDir.resolve("svg_cache").absolutePath.toPath())
-            .maxSizeBytes(50L * 1024 * 1024) // 50MB
+            .maxSizeBytes(32L * 1024 * 1024) // 32 MB disk cache
             .build()
     }
 
     private val imageLoader: ImageLoader by lazy {
         ImageLoader.Builder(context)
+            .memoryCache {
+                MemoryCache.Builder()
+                    .maxSizeBytes(32 * 1024 * 1024) // 32 MB memory cache
+                    .build()
+            }
             .components {
                 add(SvgDecoder.Factory())
             }

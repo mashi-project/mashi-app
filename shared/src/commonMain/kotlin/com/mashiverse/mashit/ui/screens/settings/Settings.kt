@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -40,6 +43,7 @@ import mashi.shared.generated.resources.collage8
 import mashi.shared.generated.resources.collage9
 import org.jetbrains.compose.resources.imageResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.math.roundToInt
 
 @Composable
 fun Settings() {
@@ -47,6 +51,12 @@ fun Settings() {
     val viewModel = koinViewModel<SettingsViewModel>()
     val wallet by remember {
         viewModel.wallet
+    }
+    val cacheValues = listOf(0, 128, 256, 512)
+    val cacheSize by viewModel.cacheFlow.collectAsState(0)
+
+    var index by remember(cacheSize) {
+        mutableIntStateOf(cacheValues.indexOfFirst { i -> i == cacheSize })
     }
 
     val checked by viewModel.discordFlow.collectAsState(false)
@@ -118,6 +128,31 @@ fun Settings() {
                 }
             ) {
                 Text("Clear history")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (index != 0) {
+                Column(modifier = Modifier.fillMaxWidth(0.8F)) {
+                    Text(
+                        "Cache size: ${cacheValues[index]} + 32 MB",
+                        fontSize = 10.sp,
+                        color = ContentAccentColor
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Slider(
+                        modifier = Modifier.height(8.dp),
+                        value = (index - 1).toFloat(),
+                        onValueChange = {
+                            index = it.roundToInt() + 1
+                            viewModel.updateCacheSize(cacheValues[index])
+                        },
+                        valueRange = 0f..2f,
+                        steps = 1
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.weight(1F))

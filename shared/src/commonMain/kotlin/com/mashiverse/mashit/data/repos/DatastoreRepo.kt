@@ -12,6 +12,17 @@ import kotlinx.coroutines.flow.map
 
 class DatastoreRepo(private val datastore: DataStore<Preferences>) {
 
+    val cacheFlow: Flow<Int> =
+        datastore.data
+            .catch { e ->
+                if (e is IOException) {
+                    emit(emptyPreferences())
+                }
+            }
+            .map { preferences ->
+                preferences[PreferencesKeys.CACHE] ?: 512
+            }
+
     val walletFlow: Flow<String> =
         datastore.data
             .catch { e ->
@@ -21,29 +32,6 @@ class DatastoreRepo(private val datastore: DataStore<Preferences>) {
             }
             .map { preferences ->
                 preferences[PreferencesKeys.WALLET] ?: ""
-            }
-
-    val firstLaunchFlow: Flow<Boolean> =
-        datastore.data
-            .catch { e ->
-                if (e is IOException) {
-                    emit(emptyPreferences())
-                }
-            }
-            .map { preferences ->
-                preferences[PreferencesKeys.FIRST_LAUNCH] ?: true
-            }
-
-    val notificationsFlow: Flow<Boolean> =
-        datastore.data
-            .catch { e ->
-                if (e is IOException) {
-                    emit(emptyPreferences())
-                } else {
-                }
-            }
-            .map { preferences ->
-                preferences[PreferencesKeys.NOTIFICATIONS] ?: false
             }
 
     val discordFlow: Flow<Boolean> =
@@ -68,13 +56,9 @@ class DatastoreRepo(private val datastore: DataStore<Preferences>) {
         }
     }
 
-    suspend fun setFirstLaunchCompleted() {
-        datastore.edit { preferences -> preferences[PreferencesKeys.FIRST_LAUNCH] = false }
-    }
-
-    suspend fun updateNotifications(enabled: Boolean) {
+    suspend fun updateCache(size: Int) {
         datastore.edit { preferences ->
-            preferences[PreferencesKeys.NOTIFICATIONS] = enabled
+            preferences[PreferencesKeys.CACHE] = size
         }
     }
 

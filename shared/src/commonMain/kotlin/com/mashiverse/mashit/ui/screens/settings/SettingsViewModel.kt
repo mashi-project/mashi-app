@@ -22,6 +22,7 @@ class SettingsViewModel(
 
     val walletFlow = datastoreRepo.walletFlow
     val discordFlow = datastoreRepo.discordFlow
+    val cacheFlow = datastoreRepo.cacheFlow
 
     init {
         observeWallet()
@@ -40,6 +41,12 @@ class SettingsViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun updateCacheSize(size: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            datastoreRepo.updateCache(size)
         }
     }
 
