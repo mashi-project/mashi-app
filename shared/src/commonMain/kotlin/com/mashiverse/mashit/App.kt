@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.mashiverse.mashit.app.supabase.Supabase.supabase
 import com.mashiverse.mashit.ui.screens.Main
 import com.mashiverse.mashit.ui.screens.auth.Auth
+import com.mashiverse.mashit.ui.theme.MashiTheme
 import com.mmk.kmpnotifier.KMPNotifier
 import com.mmk.kmpnotifier.push.PushListener
 import com.mmk.kmpnotifier.push.firebase.addPushListener
@@ -72,7 +73,7 @@ fun App() {
         }
     }
 
-    MaterialTheme {
+    MashiTheme {
         Column {
             if (wallet.length == 42) {
                 Main(isApprovalTeam = isApprovalTeam)
