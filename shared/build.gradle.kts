@@ -36,10 +36,10 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
-
-            export(libs.kmpnotifier.core)
-            export(libs.kmpnotifier.local)
+            optimized = true
+            linkerOpts.add("-dead_strip")
             export(libs.kmpnotifier.push.firebase)
+            export(libs.kmpnotifier.core)
         }
     }
 
@@ -128,7 +128,7 @@ kotlin {
 
             // Notifications
             api(libs.kmpnotifier.push.firebase)
-            implementation(libs.kmpnotifier.core)
+            api(libs.kmpnotifier.core)
             implementation(libs.kmpnotifier.local)
         }
         iosMain.dependencies {
