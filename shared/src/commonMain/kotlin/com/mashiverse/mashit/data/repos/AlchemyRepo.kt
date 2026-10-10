@@ -15,8 +15,10 @@ import com.mashiverse.mashit.utils.helpers.fromIpfsScheme
 import com.mashiverse.mashit.utils.helpers.parseName
 import com.mashiverse.mashit.utils.helpers.toFilebaseUri
 import com.mashiverse.mashit.utils.helpers.toIpfsPartialUri
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -35,6 +37,7 @@ class AlchemyRepo(
 ) {
     private companion object {
         const val MAX_CONCURRENT_NFTS = 8
+        const val PAGE_BUFFER = 2
     }
 
     private data class ParsedNft(
@@ -44,6 +47,7 @@ class AlchemyRepo(
         val timestamp: String
     )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getCollection(wallet: String): List<Mashi> = supervisorScope {
         val nftMap = mutableMapOf<String, Mashi>()
         val semaphore = Semaphore(MAX_CONCURRENT_NFTS)
@@ -56,33 +60,44 @@ class AlchemyRepo(
         )
 
         try {
-            var page = fetchPage(null)
+            // Producer: fetches pages back to back, as soon as each key is known.
+            // Never waits for parsing, except when the buffer is full.
+            val pages = produce(capacity = PAGE_BUFFER) {
+                var key: String? = null
+                do {
+                    val p = fetchPage(key)
+                    send(p)
+                    key = p.pageKey
+                } while (key != null)
+            }
 
-            while (true) {
-                // Kick off the next page immediately, before touching this one
-                val nextPage = page.pageKey?.let { key -> async { fetchPage(key) } }
+            try {
+                // Consumer: parses and merges while the producer keeps fetching
+                for (page in pages) {
+                    // Parse all NFTs of this page concurrently (bounded), order preserved
+                    val parsed = page.ownedNfts.map { nft ->
+                        async { semaphore.withPermit { parseNft(nft) } }
+                    }.awaitAll()
 
-                // Parse all NFTs of this page concurrently (bounded), order preserved
-                val parsed = page.ownedNfts.map { nft ->
-                    async { semaphore.withPermit { parseNft(nft) } }
-                }.awaitAll()
-
-                // Merge sequentially -> no shared-state races
-                for (p in parsed.filterNotNull()) {
-                    val currentOwned = Owned(mint = p.details.mint, timestamp = p.timestamp)
-                    val existing = nftMap[p.details.name]
-                    nftMap[p.details.name] =
-                        existing?.copy(owned = (existing.owned ?: emptyList()) + currentOwned)
-                            ?: Mashi(
-                                name = p.details.name,
-                                compositeUrl = p.compositeUrl,
-                                traits = p.traits,
-                                author = p.details.authorName,
-                                owned = listOf(currentOwned)
-                            )
+                    // Merge sequentially -> no shared-state races
+                    for (p in parsed.filterNotNull()) {
+                        val currentOwned = Owned(mint = p.details.mint, timestamp = p.timestamp)
+                        val existing = nftMap[p.details.name]
+                        nftMap[p.details.name] =
+                            existing?.copy(owned = (existing.owned ?: emptyList()) + currentOwned)
+                                ?: Mashi(
+                                    name = p.details.name,
+                                    compositeUrl = p.compositeUrl,
+                                    traits = p.traits,
+                                    author = p.details.authorName,
+                                    owned = listOf(currentOwned)
+                                )
+                    }
                 }
-
-                page = nextPage?.await() ?: break
+            } finally {
+                // If the consumer fails or is cancelled, stop the producer.
+                // Otherwise it could stay suspended in send() and supervisorScope would never return.
+                pages.cancel()
             }
 
             nftMap.values.toList()
@@ -101,7 +116,7 @@ class AlchemyRepo(
         var compositeUrl = ""
         var traits: List<TraitDetails> = emptyList()
         var needsFallback =
-            metadata?.image == null || metadata.assets == null || metadata.name == null
+            metadata?.image == null || metadata.name == null
 
         val tokenUri = nft.tokenUri.toFilebaseUri().toIpfsPartialUri()
 
