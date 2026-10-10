@@ -94,7 +94,7 @@ fun MashupPreview(
 
         // The sheet is centered in a window as wide as the whole screen.
         // Move its right edge to the right edge of the content area.
-        val offsetX = if (isHalfWidth) (windowWidth - sheetWidth) / 2 - endInset else 0.dp
+        val offsetX = if (isHalfWidth) (windowWidth - sheetWidth) / 2 - endInset else 0.dp - endInset / 2
 
         ModalBottomSheet(
             modifier = Modifier
