@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.mashiverse.mashit.data.models.colors.ColorType
 import com.mashiverse.mashit.data.models.image.ImageType
+import com.mashiverse.mashit.data.models.screen.ScreenInfo
 import com.mashiverse.mashit.data.models.traits.TraitType
 import com.mashiverse.mashit.data.states.mashup.ActionsIntent
 import com.mashiverse.mashit.ui.availability.NotFound
@@ -57,6 +58,8 @@ import com.mashiverse.mashit.ui.theme.XLHolderHeight
 import com.mashiverse.mashit.ui.theme.XLHolderWidth
 import com.mashiverse.mashit.utils.decoders.AnimationGate
 import com.mashiverse.mashit.utils.helpers.detectScreenType
+import com.mashiverse.mashit.utils.helpers.fold.FoldState
+import com.mashiverse.mashit.utils.helpers.fold.rememberFoldState
 import com.mashiverse.mashit.utils.helpers.getTraitsByType
 import com.mashiverse.mashit.utils.helpers.sortNfts
 import com.mashiverse.mashit.utils.helpers.toHexColor
@@ -73,6 +76,7 @@ fun Mashup(searchQuery: String, isApprovalTeam: Boolean = false) {
     val isLoading by remember { viewModel.isLoading }
     val isGenerate by remember { viewModel.isGenerateDialog }
     val isDiscord by viewModel.isDiscord.collectAsState(false)
+    val fold by rememberFoldState()
 
     if (isApprovalTeam) {
         viewModel.loadForApprovalTeam()
@@ -187,132 +191,167 @@ fun Mashup(searchQuery: String, isApprovalTeam: Boolean = false) {
 
     val isSync by remember { viewModel.isSync }
 
+    @Composable
+    fun mashupComposable(modifier: Modifier) {
+        Box(modifier = modifier) {
+            if (isSync) {
+                SyncIndicator(
+                    modifier = Modifier
+                        .padding(start = Padding)
+                        .size(40.dp)
+                        .align(Alignment.TopStart)
+                )
+            }
+
+            MashupActions(
+                mashupDetails = mashupDetailsWithColors,
+                modifier = Modifier
+                    .height(XLHolderHeight)
+                    .width(XLHolderWidth)
+                    .clickable {
+                        viewModel.processActionsIntent(
+                            ActionsIntent.OnPreview
+                        )
+                    },
+                holderWidth = XLHolderWidth,
+                processImageIntent = {
+                    viewModel.processImageIntent(it)
+                },
+                processActionsIntent = {
+                    viewModel.processActionsIntent(it)
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun mashiComposable(screenType: ScreenInfo, modifier: Modifier) {
+        Column(modifier = modifier) {
+            if (mashupUiState.isCollectionReady) {
+                if (sortedNfts.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        NotFound(modifier = Modifier.fillMaxSize())
+                    }
+                } else {
+                    if (mashupUiState.isCollectibles) {
+                        CollectiblesCategory(
+                            modifier = Modifier.weight(1f),
+                            nfts = sortedNfts,
+                            mashupDetails = mashupState.mashupDetails,
+                            state = collectiblesVState,
+                            scope = scope,
+                            processMashupIntent = {
+                                viewModel.processMashupIntent(it)
+                            },
+                            processImageIntent = {
+                                viewModel.processImageIntent(it)
+                            },
+                        )
+                    } else {
+                        MashupTraitHolderGrid(
+                            modifier = Modifier.weight(1f),
+                            items = traits,
+                            selectedTraitUrl = selectedTraitUrl,
+                            state = traitsGridState,
+                            spacedByHoriz = MediumPadding,
+                            spacedByVert = MediumPadding,
+                            columns = screenType.columns,
+                            processImageIntent = {
+                                viewModel.processImageIntent(it)
+                            },
+                            processMashupIntent = {
+                                viewModel.processMashupIntent(it)
+                            },
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.padding(vertical = SmallPadding),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Sorting { type ->
+                        viewModel.changeSortType(
+                            scope = scope,
+                            vState = collectiblesVState,
+                            gState = traitsGridState,
+                            type = type,
+                        )
+                    }
+
+                    CategorySelector(
+                        mashupState = mashupState,
+                        mashupUiState = mashupUiState,
+                        processMashupIntent = {
+                            viewModel.processMashupIntent(it)
+                        },
+                        gridState = traitsGridState,
+                        scope = scope,
+                    )
+                }
+            }
+        }
+    }
+
     BoxWithConstraints {
         val screenType = maxWidth.detectScreenType()
 
         Column {
             if (mashupState.wallet != null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = Padding),
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
+                if (fold == FoldState.NOT_FOLDABLE_OR_CLOSED) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = Padding),
                     ) {
-                        if (isSync) {
-                            SyncIndicator(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .align(Alignment.TopStart),
+                        mashupComposable(modifier = Modifier.fillMaxWidth())
+
+                        Spacer(
+                            modifier = Modifier.height(SmallPadding)
+                        )
+
+                        mashiComposable(
+                            screenType,
+                            modifier = Modifier
+                                .wrapContentHeight()
+                                .onSizeChanged { size ->
+                                    height = with(density) {
+                                        size.height.toDp()
+                                    } + 80.dp
+                                }
+                        )
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1F)) {
+                            mashupComposable(
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
 
-                        MashupActions(
-                            mashupDetails = mashupDetailsWithColors,
+                        mashiComposable(
+                            ScreenInfo.COMPACT,
                             modifier = Modifier
-                                .height(XLHolderHeight)
-                                .width(XLHolderWidth)
-                                .clickable {
-                                    viewModel.processActionsIntent(
-                                        ActionsIntent.OnPreview
-                                    )
-                                },
-                            holderWidth = XLHolderWidth,
-                            processImageIntent = {
-                                viewModel.processImageIntent(it)
-                            },
-                            processActionsIntent = {
-                                viewModel.processActionsIntent(it)
-                            }
+                                .weight(1F)
+                                .wrapContentHeight()
+                                .onSizeChanged { size ->
+                                    height = with(density) {
+                                        size.height.toDp()
+                                    } + 80.dp
+                                }
                         )
-                    }
-
-                    Spacer(
-                        modifier = Modifier.height(SmallPadding)
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .wrapContentHeight()
-                            .onSizeChanged { size ->
-                                height = with(density) {
-                                    size.height.toDp()
-                                } + 80.dp
-                            },
-                    ) {
-                        if (mashupUiState.isCollectionReady) {
-                            if (sortedNfts.isEmpty()) {
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    NotFound(modifier = Modifier.fillMaxSize())
-                                }
-                            } else {
-                                if (mashupUiState.isCollectibles) {
-                                    CollectiblesCategory(
-                                        modifier = Modifier.weight(1f),
-                                        nfts = sortedNfts,
-                                        mashupDetails = mashupState.mashupDetails,
-                                        state = collectiblesVState,
-                                        scope = scope,
-                                        processMashupIntent = {
-                                            viewModel.processMashupIntent(it)
-                                        },
-                                        processImageIntent = {
-                                            viewModel.processImageIntent(it)
-                                        },
-                                    )
-                                } else {
-                                    MashupTraitHolderGrid(
-                                        modifier = Modifier.weight(1f),
-                                        items = traits,
-                                        selectedTraitUrl = selectedTraitUrl,
-                                        state = traitsGridState,
-                                        spacedByHoriz = MediumPadding,
-                                        spacedByVert = MediumPadding,
-                                        columns = screenType.columns,
-                                        processImageIntent = {
-                                            viewModel.processImageIntent(it)
-                                        },
-                                        processMashupIntent = {
-                                            viewModel.processMashupIntent(it)
-                                        },
-                                    )
-                                }
-                            }
-
-                            Row(
-                                modifier = Modifier.padding(vertical = SmallPadding),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Sorting { type ->
-                                    viewModel.changeSortType(
-                                        scope = scope,
-                                        vState = collectiblesVState,
-                                        gState = traitsGridState,
-                                        type = type,
-                                    )
-                                }
-
-                                CategorySelector(
-                                    mashupState = mashupState,
-                                    mashupUiState = mashupUiState,
-                                    processMashupIntent = {
-                                        viewModel.processMashupIntent(it)
-                                    },
-                                    gridState = traitsGridState,
-                                    scope = scope,
-                                )
-                            }
-                        }
                     }
                 }
             } else {
-                // Wallet not connected state placeholder if needed
+                LoadingIndicator()
             }
 
             if (mashupUiState.isColorChange) {
@@ -322,13 +361,14 @@ fun Mashup(searchQuery: String, isApprovalTeam: Boolean = false) {
                     color = currentColor.toHexColor(),
                     scope = scope,
                     selectedColorType = selectedColorType,
+                    isHalfWidth = fold != FoldState.NOT_FOLDABLE_OR_CLOSED,
                     processMashupIntent = {
                         viewModel.processMashupIntent(it)
                     },
                     processActionsIntent = {
                         viewModel.processActionsIntent(it)
                     },
-                    height = height,
+                    height = height
                 )
             }
 
@@ -339,12 +379,13 @@ fun Mashup(searchQuery: String, isApprovalTeam: Boolean = false) {
                             ActionsIntent.OnPreviewDismiss
                         )
                     },
+                    isHalfWidth = fold != FoldState.NOT_FOLDABLE_OR_CLOSED,
                     sheetState = previewState,
                     mashupDetails = mashupDetailsWithColors,
                     processImageIntent = {
                         viewModel.processImageIntent(it)
                     },
-                    height = height,
+                    height = height
                 )
             }
         }

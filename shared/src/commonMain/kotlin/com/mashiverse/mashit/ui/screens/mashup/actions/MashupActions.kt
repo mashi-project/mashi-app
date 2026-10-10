@@ -38,9 +38,7 @@ fun MashupActions(
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
             Spacer(Modifier.width(SmallPadding))
 
             Box(
