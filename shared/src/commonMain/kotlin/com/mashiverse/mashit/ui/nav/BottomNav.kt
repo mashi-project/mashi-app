@@ -5,8 +5,15 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.NavigationBar
 import androidx.compose.runtime.Composable
@@ -18,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import com.mashiverse.mashit.app.nav.MainRoutes
 import com.mashiverse.mashit.ui.screens.models.navItems
@@ -29,6 +37,11 @@ fun BottomNav(
     onSearchQueryChange: (String) -> Unit = {},
     onNavigation: (MainRoutes) -> Unit
 ) {
+    val dir = LocalLayoutDirection.current
+    val insets = WindowInsets.safeDrawing.asPaddingValues()
+    val startInset = insets.calculateStartPadding(dir)
+    val endInset = insets.calculateEndPadding(dir)
+
     var isSearchActive by remember { mutableStateOf(false) }
 
     val searchWeight by animateFloatAsState(
@@ -44,14 +57,14 @@ fun BottomNav(
     )
 
     NavigationBar(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = startInset, end = endInset)
             .clip(
-                RoundedCornerShape(
-                    topStartPercent = 24,
-                    topEndPercent = 24,
-                )
+                RoundedCornerShape(24)
             ),
         containerColor = Secondary,
+        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -97,7 +110,8 @@ fun BottomNav(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 SearchBar(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(horizontal = 32.dp),
                     isSearch = isSearchActive,
                     onIsSearchChange = {
