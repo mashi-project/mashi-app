@@ -60,9 +60,7 @@ fun BottomNav(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = startInset, end = endInset)
-            .clip(
-                RoundedCornerShape(24)
-            ),
+            .clip(RoundedCornerShape(24.dp)),
         containerColor = Secondary,
         windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom),
     ) {
