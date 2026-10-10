@@ -126,6 +126,10 @@ struct iOSApp: App {
         WindowGroup {
             ContentView()
                 .onOpenURL { url in
+                    UIApplication.shared.connectedScenes
+                        .compactMap { ($0 as? UIWindowScene)?.keyWindow?.rootViewController }
+                        .first?
+                        .dismiss(animated: true)
                     SupabaseHandlerIosKt.handleDeeplinks(url: url)
                 }
         }

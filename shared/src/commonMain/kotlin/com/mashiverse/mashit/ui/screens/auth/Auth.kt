@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -30,13 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mashiverse.mashit.ui.screens.background.CollageBackground
 import com.mashiverse.mashit.utils.config.RemoteConfig
+import com.mashiverse.mashit.utils.helpers.rememberDiscordInviteOpener
 import mashi.shared.generated.resources.Res
 import mashi.shared.generated.resources.collage1
 import mashi.shared.generated.resources.collage2
@@ -56,8 +55,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun Auth(onIsApprovalTeamChange: () -> Unit) {
     val scope = rememberCoroutineScope()
     val viewModel = koinViewModel<AuthViewModel>()
-    val uriHandler = LocalUriHandler.current
     var code by remember { mutableStateOf("******") }
+    val openDiscordInvite = rememberDiscordInviteOpener()
 
     val collageImages = remember {
         listOf(
@@ -134,7 +133,7 @@ fun Auth(onIsApprovalTeamChange: () -> Unit) {
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                TextButton(onClick = { uriHandler.openUri("https://discord.gg/hDTMDCf4ha") }) {
+                TextButton(onClick = { openDiscordInvite("https://discord.com/invite/hDTMDCf4ha") }) {
                     Text(
                         "If you can't sign in, click here to join our Discord\n" +
                                 "Where you have to connect the wallet",
