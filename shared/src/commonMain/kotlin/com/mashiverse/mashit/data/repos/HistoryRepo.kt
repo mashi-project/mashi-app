@@ -4,7 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.mashiverse.mashit.data.models.image.ImageType
-import com.mashiverse.mashit.data.paging.HistoryPagingSource
+import com.mashiverse.mashit.data.remote.paging.HistoryPagingSource
 import com.mashiverse.mashit.data.remote.MashiApi
 import com.mashiverse.mashit.data.remote.dtos.HistoryItemResponse
 import kotlinx.coroutines.flow.Flow

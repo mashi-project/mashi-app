@@ -1,4 +1,4 @@
-package com.mashiverse.mashit.data.paging
+package com.mashiverse.mashit.data.remote.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

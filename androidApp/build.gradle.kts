@@ -32,8 +32,8 @@ android {
         applicationId = "com.mashiverse.mashit"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 69
-        versionName = "2.2"
+        versionCode = 71
+        versionName = "2.2.2"
     }
 
     // Only package the languages you actually ship (adjust the list)
