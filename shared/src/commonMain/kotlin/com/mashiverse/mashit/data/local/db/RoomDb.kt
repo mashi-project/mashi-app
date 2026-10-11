@@ -18,7 +18,7 @@ import com.mashiverse.mashit.data.local.db.entities.NftEntity
 
 @Database(
     entities = [NftEntity::class, ImageTypeEntity::class, MashupEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @ConstructedBy(RoomDbConstructor::class)
